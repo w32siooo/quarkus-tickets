@@ -1,0 +1,27 @@
+quarkus:
+  http:
+    port: 8082
+    test-port: 18082
+    test-timeout : 10s
+  rabbitmq:
+    devservices :
+      enabled: true
+      port : 5672
+      http-port : 15672
+      shared : true
+      service-name : shared-rmq
+mp:
+  messaging:
+    outgoing:
+      tickets-orders:
+        connector: smallrye-rabbitmq
+        exchange:
+          name: ticket-orders
+          type: topic
+      ticket-activations:
+        connector: smallrye-rabbitmq
+        exchange:
+          name: ticket-activations
+          type: topic
+#rabbitmq-host : localhost
+#rabbitmq-port : 5672

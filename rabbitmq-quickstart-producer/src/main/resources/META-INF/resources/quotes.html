@@ -1,0 +1,56 @@
+<!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8"> <title>Quotes</title>
+
+    <link rel="stylesheet" type="text/css"
+          href="https://cdnjs.cloudflare.com/ajax/libs/patternfly/3.24.0/css/patternfly.min.css">
+    <link rel="stylesheet" type="text/css"
+          href="https://cdnjs.cloudflare.com/ajax/libs/patternfly/3.24.0/css/patternfly-additions.min.css">
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <div class="card-body">
+            <h2 class="card-title">Tickets</h2>
+            EventId: <input type="text" id="eventId" value="ayo">
+            quantity: <input type="text" id="quantity" value="5">
+            <button class="btn btn-info" id="request-quote">Order Ticket</button>
+            <div class="quotes"></div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+
+    $("#request-quote").click((event) => {
+        const eventId =document.getElementById('eventId').value;
+        const quantity =document.getElementById('quantity').value;
+
+        const body = "{\n" +
+            "    \"userId\" : \"0d68db1b-3848-45a2-9600-d32160779ff3\",\n" +
+            "    \"eventId\":\""  + eventId + "\",\n" +
+            "    \"quantity\" : " + quantity +
+            "}";
+
+        fetch("/api/tickets/create", {method: "POST",  body: body, headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(res => res.text())
+            .then(qid => {
+                const row = $(`<h4 class='col-md-12' id='${qid}'>Ticket ordered # <i>${qid}</i> | <strong>Ordered</strong></h4>`);
+                $(".quotes").append(row);
+            });
+    });
+
+</script>
+</html>
+<!--
+Eventsource.
+   var source = new EventSource("/quotes");
+    source.onmessage = (event) => {
+        var json = JSON.parse(event.data);
+        $(`#${json.id}`).html(function(index, html) {
+            return html.replace("Ordered", `\$\xA0${json.price}`);
+        });
+    };
+-->

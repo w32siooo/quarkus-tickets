@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/hibernate-orm-panache-quickstart/hibernate-reactive-panache-quickstart.iml" filepath="$PROJECT_DIR$/hibernate-orm-panache-quickstart/hibernate-reactive-panache-quickstart.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/quarkus.iml" filepath="$PROJECT_DIR$/.idea/quarkus.iml" />
+      <module fileurl="file://$PROJECT_DIR$/rabbitmq-quickstart-processor/rabbitmq-quickstart-processor.iml" filepath="$PROJECT_DIR$/rabbitmq-quickstart-processor/rabbitmq-quickstart-processor.iml" />
+      <module fileurl="file://$PROJECT_DIR$/rabbitmq-quickstart-producer/rabbitmq-quickstart-producer.iml" filepath="$PROJECT_DIR$/rabbitmq-quickstart-producer/rabbitmq-quickstart-producer.iml" />
+    </modules>
+  </component>
+</project>
