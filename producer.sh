@@ -1,2 +1,2 @@
 #!/bin/bash
-cd rabbitmq-quickstart-producer/ && quarkus dev
+cd producer/ && quarkus dev

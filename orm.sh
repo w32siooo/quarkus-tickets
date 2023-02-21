@@ -1,2 +1,2 @@
 #!/bin/bash
-cd hibernate-orm-panache-quickstart/ && quarkus dev
+cd orm / && quarkus dev
