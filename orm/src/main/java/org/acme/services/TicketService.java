@@ -26,7 +26,7 @@ public class TicketService {
 
   @Inject ObjectMapper objectMapper;
 
-  @Transactional()
+  @Transactional
   public TicketAggregate getTicketsForUser(String eventId, UUID userId) {
     AtomicInteger activatedTickets = new AtomicInteger(0);
     AtomicInteger inactiveTickets = new AtomicInteger(0);

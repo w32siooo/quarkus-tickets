@@ -1,10 +1,23 @@
 package cygni.panache;
 
 import io.quarkus.runtime.annotations.RegisterForReflection;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 
-import javax.persistence.*;
+import javax.persistence.Cacheable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.NamedQuery;
+import javax.persistence.SequenceGenerator;
 import java.time.ZonedDateTime;
 
 @Entity
@@ -15,6 +28,8 @@ import java.time.ZonedDateTime;
 @Getter
 @Setter
 @Builder
+@ToString
+@NamedQuery(name = "Tickets.findAll", query = "SELECT f FROM TicketEventDb f WHERE f.eventId = :eventId ORDER BY f.createdAt")
 public class TicketEventDb  {
 
     @Id

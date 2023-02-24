@@ -7,12 +7,17 @@ import cygni.panache.EventData;
 import cygni.panache.EventType;
 import cygni.panache.TicketEventDb;
 import io.smallrye.mutiny.Uni;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.reactive.mutiny.Mutiny;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @ApplicationScoped
+@Slf4j
 public class TicketService {
   @Inject Mutiny.SessionFactory sf;
 
@@ -31,4 +36,16 @@ public class TicketService {
     return sf.withTransaction(session -> session.persist(ticketEventDb))
         .replaceWith(Uni.createFrom().item(ticketEventDb));
   }
+
+  public Uni<List<TicketEventDb>> getTicketsForUser(String eventId, UUID userId) {
+    AtomicInteger activatedTickets = new AtomicInteger(0);
+    AtomicInteger inactiveTickets = new AtomicInteger(0);
+
+    return this.sf
+            .withTransaction((session,transaction) -> session
+                    .createNamedQuery("Tickets.findAll",TicketEventDb.class)
+                    .setParameter("eventId",eventId)
+                    .getResultList())
+            .log();
+  };
 }

@@ -13,7 +13,7 @@ quarkus:
       port: 5432
   hibernate-orm:
     database:
-      generation: drop-and-create
+      generation: update
       log:
         sql: false
     # load-script : import.sql
