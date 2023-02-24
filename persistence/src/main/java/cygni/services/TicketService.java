@@ -7,7 +7,6 @@ import cygni.model.TicketCreateEvent;
 import cygni.panache.EventData;
 import cygni.panache.EventType;
 import cygni.panache.TicketEventDb;
-import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.reactive.mutiny.Mutiny;
@@ -15,7 +14,6 @@ import org.hibernate.reactive.mutiny.Mutiny;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -52,28 +50,31 @@ public class TicketService {
                 .setParameter("eventId", eventId)
                 .setParameter("userId", userId)
                 .getResultList()
-                .map(s->{
-                  s.forEach(eventDb->{
-                    if(eventDb.getEventType().equals(EventType.TICKET_CREATED))
-                    {
-                      try {
-                        inactiveTickets.addAndGet(objectMapper.readValue(eventDb.getData(), EventData.class).getQuantity());
-                      } catch (JsonProcessingException e) {
-                        throw new RuntimeException(e);
-                      }
-                    }else if (eventDb.getEventType().equals(EventType.TICKET_ACTIVATED)){
-                      try {
-                        activatedTickets.addAndGet(objectMapper.readValue(eventDb.getData(), EventData.class).getQuantity());
-                      } catch (JsonProcessingException e) {
-                        throw new RuntimeException(e);
-                      }
-                    }
-                  });
+                .map(
+                    resultList -> {
+                      resultList.forEach(
+                          eventDb -> {
+                            EventData eventData;
+                            try {
+                              eventData =
+                                  objectMapper.readValue(eventDb.getData(), EventData.class);
+                            } catch (JsonProcessingException e) {
+                              throw new RuntimeException("Jackson kunne ikke serialisere "+ e);
+                            }
+                            if (eventDb.getEventType().equals(EventType.TICKET_CREATED)) {
+                              inactiveTickets.addAndGet(eventData.getQuantity());
 
-                  return new TicketAggregate(userId,activatedTickets.get(),inactiveTickets.get(),ZonedDateTime.now());
-                })
-                );
+                            } else if (eventDb.getEventType().equals(EventType.TICKET_ACTIVATED)) {
+                              activatedTickets.addAndGet(eventData.getQuantity());
+                            }
+                          });
 
+                      return new TicketAggregate(
+                          userId,
+                          activatedTickets.get(),
+                          inactiveTickets.get(),
+                          ZonedDateTime.now());
+                    }));
   }
   ;
 }
