@@ -1,0 +1,24 @@
+quarkus:
+  datasource:
+    db-kind: postgresql
+    username: quarkus_test
+    password: quarkus_test
+    reactive:
+      url: vertx-reactive:postgresql://localhost/quarkus_test
+    devservices:
+      enabled: true
+      username: quarkus_test
+      password: quarkus_test
+      db-name: quarkus_test
+      port: 5432
+  hibernate-orm:
+    database:
+      generation: drop-and-create
+      log:
+        sql: false
+    # load-script : import.sql
+  http:
+    port: 8085
+    test-port: 18082
+    test-timeout: 10s
+

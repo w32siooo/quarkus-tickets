@@ -1,32 +1,36 @@
-"%prod":
-  quarkus:
-    datasource:
-      db-kind: postgresql
-      username: quarkus_test
-      password: quarkus_test
-      reactive:
-        url: vertx-reactive:postgresql://localhost/quarkus_test
 quarkus:
-  hibernate-orm:
-    database:
-      generation : drop-and-create
-      log:
-        sql: false
-    load-script : import.sql
   http:
     port: 8080
+  rabbitmq:
+    devservices:
+      enabled: true
+      port: 5672
+      http-port: 15672
+      shared: true
+      service-name: shared-rmq
 
-rabbitmq-host : localhost
-rabbitmq-port : 5672
+#rabbitmq-host : localhost
+#rabbitmq-port : 5672
 
-np:
+mp:
   messaging:
     incoming:
-      tickets:
+      ticket-orders:
         connector: smallrye-rabbitmq
         queue:
-          name: requests
-
- # Inbound
-#mp.messaging.incoming.ticket.connector=smallrye-rabbitmq
-#np.messaging.incoming.ticket.queue.name=requests
+          name: ticket-orders
+        exchange:
+          name: ticket-orders
+          durable: true
+          type: topic
+      ticket-activations:
+        connector: smallrye-rabbitmq
+        queue:
+          name: ticket-activations
+        exchange:
+          name: ticket-activations
+          durable: true
+          type: topic
+"#dev":
+  rabbitmq-host: localhost
+  rabbitmq-port: 5672
