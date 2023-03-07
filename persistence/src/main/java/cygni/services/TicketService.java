@@ -10,6 +10,7 @@ import cygni.panache.EventData;
 import cygni.panache.EventType;
 import cygni.panache.TicketEventDb;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.unchecked.Unchecked;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.reactive.mutiny.Mutiny;
 
@@ -59,15 +60,30 @@ public class TicketService {
                                               try {
                                                   ticketEventDb.setData(objectMapper.writeValueAsString(eventData));
                                               } catch (JsonProcessingException e) {
-                                                  throw new RuntimeException(e);
+                                                  throw new RuntimeException("Jackson kunne ikke serialisere " + e);
                                               }
-                                             return session.persist(ticketEventDb);
+                                              log.info("Ticket ordered for event: " + ev.getEventId());
+                                              log.info(ticketEventDb.toString());
+                                             return ticketEventDb;
                                           }else {
+                                                log.info("Not enough tickets available for event: " + ev.getEventId());
                                               return null;
                                           }
                                       }
                                       )
-      ).replaceWithVoid();
+      ).map(
+              Unchecked.function(ticketEventDb -> {
+                  if (ticketEventDb != null) {
+                      return this.sf.withTransaction(
+                              (session, transaction) -> session.persist(ticketEventDb)
+                      );
+                  } else {
+                      throw new RuntimeException("Not enough tickets available");
+                  }
+              })
+      ).flatMap(
+              uni -> uni
+      );
   }
 
   public Uni<TicketEventDb> createTicket(TicketCreateEvent ev) {

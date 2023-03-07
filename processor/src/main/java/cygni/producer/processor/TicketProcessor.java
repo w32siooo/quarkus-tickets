@@ -33,7 +33,7 @@ public class TicketProcessor {
     this.webClient = WebClient.create(vertx);
   }
 
-  @Incoming("ticket-order-request")
+  @Incoming("ticket-create-request")
   public Uni<Void> consumeCreation(JsonObject command) {
 
       TicketCreateEvent event = command.mapTo(TicketCreateEvent.class);

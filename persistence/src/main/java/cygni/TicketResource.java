@@ -2,6 +2,7 @@ package cygni;
 
 import cygni.model.TicketActivatedEvent;
 import cygni.model.TicketCreateEvent;
+import cygni.model.TicketOrderEvent;
 import cygni.services.TicketService;
 import io.smallrye.mutiny.Uni;
 import lombok.extern.slf4j.Slf4j;
@@ -49,4 +50,14 @@ public class TicketResource {
         .activateTicket(activateEvent)
         .map(res -> Response.status(Response.Status.CREATED).entity(res).build());
   }
+  @POST
+    @Consumes
+    @Produces
+    @Path("order")
+public Uni<Response> order(@NotNull TicketOrderEvent orderEvent) {
+    return service
+            .orderTicket(orderEvent)
+            .map(res -> Response.status(Response.Status.CREATED).entity(res).build());
+  }
+
 }
