@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cygni.model.TicketActivatedEvent;
 import cygni.model.TicketAggregate;
+import cygni.model.TicketCreateEvent;
 import cygni.model.TicketOrderEvent;
 import cygni.panache.EventData;
 import cygni.panache.EventType;
@@ -25,14 +26,54 @@ public class TicketService {
 
   @Inject ObjectMapper objectMapper;
 
-  public Uni<TicketEventDb> createTicket(TicketCreateCommand command){
 
+  //order ticket if there are available tickets
+  public Uni<Void> orderTicket(TicketOrderEvent ev){
+      return this.sf.withTransaction(
+              (session, transaction) ->
+                      session
+                              .createNamedQuery("Tickets.findAllByEventId", TicketEventDb.class)
+                              .setParameter("eventId", ev.getEventId())
+                              .getResultList()
+                              .map(
+                                      resultList -> {
+                                          int availableTickets = 0;
+                                          for (TicketEventDb eventDb : resultList) {
+                                              EventData eventData;
+                                              try {
+                                                  eventData =
+                                                          objectMapper.readValue(eventDb.getData(), EventData.class);
+                                              } catch (JsonProcessingException e) {
+                                                  throw new RuntimeException("Jackson kunne ikke serialisere " + e);
+                                              }
+                                              if (eventDb.getEventType().equals(EventType.TICKET_CREATED)) {
+                                                  availableTickets += eventData.getQuantity();
+                                              }
+                                          }
+                                          if (availableTickets >= ev.getQuantity()) {
+                                              TicketEventDb ticketEventDb = new TicketEventDb();
+                                              ticketEventDb.setEventId(ev.getEventId());
+                                              ticketEventDb.setEventType(EventType.TICKET_ORDERED);
+                                              ticketEventDb.setUserId(UUID.fromString(ev.getUserId()));
+                                              EventData eventData = new EventData(ev.getQuantity(), UUID.fromString(ev.getUserId()));
+                                              try {
+                                                  ticketEventDb.setData(objectMapper.writeValueAsString(eventData));
+                                              } catch (JsonProcessingException e) {
+                                                  throw new RuntimeException(e);
+                                              }
+                                             return session.persist(ticketEventDb);
+                                          }else {
+                                              return null;
+                                          }
+                                      }
+                                      )
+      ).replaceWithVoid();
   }
 
-  public Uni<TicketEventDb> orderTicket(TicketOrderEvent ev) {
+  public Uni<TicketEventDb> createTicket(TicketCreateEvent ev) {
     TicketEventDb ticketEventDb = new TicketEventDb();
     ticketEventDb.setEventId(ev.getEventId());
-    ticketEventDb.setEventType(EventType.TICKET_ORDERED);
+    ticketEventDb.setEventType(EventType.TICKET_CREATED);
     ticketEventDb.setUserId(ev.getUserId());
     EventData eventData = new EventData(ev.getQuantity(), ev.getUserId());
     try {
@@ -51,7 +92,7 @@ public class TicketService {
     return this.sf.withTransaction(
         (session, transaction) ->
             session
-                .createNamedQuery("Tickets.findAllByEventId", TicketEventDb.class)
+                .createNamedQuery("Tickets.findAllByEventIdAndUserId", TicketEventDb.class)
                 .setParameter("eventId", eventId)
                 .setParameter("userId", userId)
                 .getResultList()

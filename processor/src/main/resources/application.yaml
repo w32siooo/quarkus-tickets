@@ -15,20 +15,28 @@ quarkus:
 mp:
   messaging:
     incoming:
-      ticket-orders:
+      ticket-order-request:
         connector: smallrye-rabbitmq
         queue:
-          name: ticket-orders
+          name: ticket-order-request
         exchange:
-          name: ticket-orders
+          name: ticket-order-request
           durable: true
           type: topic
-      ticket-activations:
+      ticket-activate-request:
         connector: smallrye-rabbitmq
         queue:
-          name: ticket-activations
+          name: ticket-activate-request
         exchange:
-          name: ticket-activations
+          name: ticket-activate-request
+          durable: true
+          type: topic
+      ticket-create-request:
+        connector: smallrye-rabbitmq
+        queue:
+          name: ticket-create-request
+        exchange:
+          name: ticket-create-request
           durable: true
           type: topic
 "#dev":

@@ -13,15 +13,21 @@ quarkus:
 mp:
   messaging:
     outgoing:
-      tickets-orders:
+      tickets-create-request:
         connector: smallrye-rabbitmq
         exchange:
-          name: ticket-orders
+          name: ticket-create-request
           type: topic
-      ticket-activations:
+      ticket-activate-request:
         connector: smallrye-rabbitmq
         exchange:
-          name: ticket-activations
+          name: ticket-activate-request
           type: topic
+      ticket-order-request:
+        connector: smallrye-rabbitmq
+        exchange:
+          name: ticket-order-request
+          type: topic
+
 #rabbitmq-host : localhost
 #rabbitmq-port : 5672

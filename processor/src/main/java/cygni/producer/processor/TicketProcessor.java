@@ -6,7 +6,7 @@ import javax.inject.Inject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import cygni.producer.model.TicketActivatedEvent;
-import cygni.producer.model.TicketOrderEvent;
+import cygni.producer.model.TicketCreateEvent;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -33,10 +33,10 @@ public class TicketProcessor {
     this.webClient = WebClient.create(vertx);
   }
 
-  @Incoming("ticket-orders")
-  public Uni<Void> consumeOrder(JsonObject command) {
+  @Incoming("ticket-order-request")
+  public Uni<Void> consumeCreation(JsonObject command) {
 
-      TicketOrderEvent event = command.mapTo(TicketOrderEvent.class);
+      TicketCreateEvent event = command.mapTo(TicketCreateEvent.class);
 
     log.error(event.toString());
 
@@ -47,7 +47,7 @@ public class TicketProcessor {
     return Uni.createFrom().voidItem();
   }
 
-  @Incoming("ticket-activations")
+  @Incoming("ticket-activate-request")
   public Uni<Void> consumeActivation(JsonObject command) {
 
     TicketActivatedEvent event = command.mapTo(TicketActivatedEvent.class);
@@ -60,4 +60,17 @@ public class TicketProcessor {
 
     return Uni.createFrom().voidItem();
   }
+ @Incoming("ticket-order-request")
+  public Uni<Void> consumeOrder(JsonObject command) {
+
+   TicketActivatedEvent event = command.mapTo(TicketActivatedEvent.class);
+
+   log.error(event.toString());
+
+   webClient.post(8085, "127.0.0.1", "/tickets/order")
+           .sendJson(event)
+           .onFailure(throwable -> log.error("failure " + throwable.getMessage() + " " + throwable.getCause()));
+
+   return Uni.createFrom().voidItem();
+ }
 }

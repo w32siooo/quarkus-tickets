@@ -1,6 +1,7 @@
 package cygni.panache;
 
 import io.quarkus.runtime.annotations.RegisterForReflection;
+import jdk.jfr.Name;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -30,7 +31,8 @@ import java.util.UUID;
 @Setter
 @Builder
 @ToString
-@NamedQuery(name = "Tickets.findAllByEventId", query = "SELECT f FROM TicketEventDb f WHERE f.eventId = :eventId AND f.userId = :userId ORDER BY f.createdAt")
+@NamedQuery(name="Tickets.findAllByEventId", query="SELECT f FROM TicketEventDb f WHERE f.eventId = :eventId ORDER BY f.createdAt")
+@NamedQuery(name = "Tickets.findAllByEventIdAndUserId", query = "SELECT f FROM TicketEventDb f WHERE f.eventId = :eventId AND f.userId = :userId ORDER BY f.createdAt")
 public class TicketEventDb  {
 
     @Id

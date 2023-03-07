@@ -1,6 +1,7 @@
 package cygni.producer.services;
 
 import cygni.producer.commands.TicketActivateCommand;
+import cygni.producer.commands.TicketCreateCommand;
 import cygni.producer.commands.TicketOrderCommand;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.reactive.messaging.MutinyEmitter;
@@ -16,22 +17,29 @@ public class TicketProducerService {
   @OnOverflow(value = OnOverflow.Strategy.BUFFER, bufferSize = 10)
   @Inject
 
-  @Channel("ticket-orders")
-  MutinyEmitter<TicketOrderCommand> createCommandMutinyEmitter;
+  @Channel("ticket-create-request")
+  MutinyEmitter<TicketCreateCommand> createCommandMutinyEmitter;
 
-  @Channel("ticket-activations")
+  @Channel("ticket-activate-request")
   MutinyEmitter<TicketActivateCommand> activateCommandMutinyEmitter;
 
-  public Uni<Void> orderTicket(TicketOrderCommand ticketOrderCommand) {
+  @Channel("ticket-order-request")
+  MutinyEmitter<TicketOrderCommand> orderCommandMutinyEmitter;
 
-    log.info("sending ticket to ticket-requests");
 
-    return createCommandMutinyEmitter.send(ticketOrderCommand);
+  public Uni<Void> createTicket(TicketCreateCommand ticketCreateCommand) {
+
+
+    return createCommandMutinyEmitter.send(ticketCreateCommand);
 
   }
 
   public  Uni<Void> activateTicket(TicketActivateCommand ticketActivateCommand) {
 
     return activateCommandMutinyEmitter.send(ticketActivateCommand);
+  }
+
+  public Uni<Void> orderTickets(TicketOrderCommand ticketOrderCommand) {
+    return orderCommandMutinyEmitter.send(ticketOrderCommand);
   }
 }

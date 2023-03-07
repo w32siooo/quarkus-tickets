@@ -8,11 +8,11 @@ import lombok.NoArgsConstructor;
 import java.util.UUID;
 
 @Data
-@AllArgsConstructor
 @Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class TicketOrderCommand {
-    private UUID userId;
     private String eventId;
     private Integer quantity;
+    private UUID userId;
 }

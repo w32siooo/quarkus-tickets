@@ -1,7 +1,7 @@
 package cygni.producer.resources;
 
 import cygni.producer.commands.TicketActivateCommand;
-import cygni.producer.commands.TicketOrderCommand;
+import cygni.producer.commands.TicketCreateCommand;
 import cygni.producer.model.TicketActivatedDto;
 import cygni.producer.model.TicketCreatedDto;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
@@ -23,7 +23,7 @@ public class QuotesResourceTest {
         assert given()
                 .when()
                 .contentType(ContentType.JSON)
-                .body(TicketOrderCommand.builder().eventId("123").build())
+                .body(TicketCreateCommand.builder().eventId("123").build())
                 .post("/create")
                 .then()
                 .statusCode(200)
