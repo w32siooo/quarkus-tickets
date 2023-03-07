@@ -11,7 +11,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @NoArgsConstructor
-public class TicketCreateEvent {
+public class TicketOrderEvent {
     private UUID userId;
     private String eventId;
     private Integer quantity;

@@ -2,8 +2,9 @@ package cygni.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import cygni.model.TicketActivatedEvent;
 import cygni.model.TicketAggregate;
-import cygni.model.TicketCreateEvent;
+import cygni.model.TicketOrderEvent;
 import cygni.panache.EventData;
 import cygni.panache.EventType;
 import cygni.panache.TicketEventDb;
@@ -24,10 +25,14 @@ public class TicketService {
 
   @Inject ObjectMapper objectMapper;
 
-  public Uni<TicketEventDb> createTicket(TicketCreateEvent ev) {
+  public Uni<TicketEventDb> createTicket(TicketCreateCommand command){
+
+  }
+
+  public Uni<TicketEventDb> orderTicket(TicketOrderEvent ev) {
     TicketEventDb ticketEventDb = new TicketEventDb();
     ticketEventDb.setEventId(ev.getEventId());
-    ticketEventDb.setEventType(EventType.TICKET_CREATED);
+    ticketEventDb.setEventType(EventType.TICKET_ORDERED);
     ticketEventDb.setUserId(ev.getUserId());
     EventData eventData = new EventData(ev.getQuantity(), ev.getUserId());
     try {
@@ -59,9 +64,9 @@ public class TicketService {
                               eventData =
                                   objectMapper.readValue(eventDb.getData(), EventData.class);
                             } catch (JsonProcessingException e) {
-                              throw new RuntimeException("Jackson kunne ikke serialisere "+ e);
+                              throw new RuntimeException("Jackson kunne ikke serialisere " + e);
                             }
-                            if (eventDb.getEventType().equals(EventType.TICKET_CREATED)) {
+                            if (eventDb.getEventType().equals(EventType.TICKET_ORDERED)) {
                               inactiveTickets.addAndGet(eventData.getQuantity());
 
                             } else if (eventDb.getEventType().equals(EventType.TICKET_ACTIVATED)) {
@@ -75,6 +80,22 @@ public class TicketService {
                           inactiveTickets.get(),
                           ZonedDateTime.now());
                     }));
+  }
+
+  public Uni<TicketEventDb> activateTicket(TicketActivatedEvent ev) {
+    TicketEventDb ticketEventDb = new TicketEventDb();
+    ticketEventDb.setEventId(ev.getEventId());
+    ticketEventDb.setEventType(EventType.TICKET_ACTIVATED);
+    ticketEventDb.setUserId(ev.getUserId());
+    EventData eventData = new EventData(ev.getQuantity(), ev.getUserId());
+    try {
+      ticketEventDb.setData(objectMapper.writeValueAsString(eventData));
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
+    return this.sf
+        .withTransaction((s, t) -> s.persist(ticketEventDb))
+        .replaceWith(Uni.createFrom().item(ticketEventDb));
   }
   ;
 }

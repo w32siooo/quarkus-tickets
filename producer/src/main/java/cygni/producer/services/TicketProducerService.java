@@ -1,7 +1,7 @@
 package cygni.producer.services;
 
 import cygni.producer.commands.TicketActivateCommand;
-import cygni.producer.commands.TicketCreateCommand;
+import cygni.producer.commands.TicketOrderCommand;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.reactive.messaging.MutinyEmitter;
 import lombok.extern.slf4j.Slf4j;
@@ -17,16 +17,16 @@ public class TicketProducerService {
   @Inject
 
   @Channel("ticket-orders")
-  MutinyEmitter<TicketCreateCommand> createCommandMutinyEmitter;
+  MutinyEmitter<TicketOrderCommand> createCommandMutinyEmitter;
 
   @Channel("ticket-activations")
   MutinyEmitter<TicketActivateCommand> activateCommandMutinyEmitter;
 
-  public Uni<Void> orderTicket(TicketCreateCommand ticketCreateCommand) {
+  public Uni<Void> orderTicket(TicketOrderCommand ticketOrderCommand) {
 
     log.info("sending ticket to ticket-requests");
 
-    return createCommandMutinyEmitter.send(ticketCreateCommand);
+    return createCommandMutinyEmitter.send(ticketOrderCommand);
 
   }
 

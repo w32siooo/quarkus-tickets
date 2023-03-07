@@ -5,7 +5,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
 import cygni.producer.commands.TicketActivateCommand;
-import cygni.producer.commands.TicketCreateCommand;
+import cygni.producer.commands.TicketOrderCommand;
 import cygni.producer.model.TicketActivatedDto;
 import cygni.producer.model.TicketCreatedDto;
 import cygni.producer.services.TicketProducerService;
@@ -27,17 +27,17 @@ public class TicketResource {
   @Path("/create")
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
-  public Uni<TicketCreatedDto> orderTickets(TicketCreateCommand ticketCreateCommand) {
+  public Uni<TicketCreatedDto> orderTickets(TicketOrderCommand ticketOrderCommand) {
 
     return ticketProducerService
-        .orderTicket(ticketCreateCommand)
+        .orderTicket(ticketOrderCommand)
         .replaceWith(
             Uni.createFrom()
                 .item(
                     TicketCreatedDto.builder()
-                        .eventId(ticketCreateCommand.getEventId())
-                        .quantity(ticketCreateCommand.getQuantity())
-                        .userId(ticketCreateCommand.getUserId())
+                        .eventId(ticketOrderCommand.getEventId())
+                        .quantity(ticketOrderCommand.getQuantity())
+                        .userId(ticketOrderCommand.getUserId())
                         .build()));
   }
 

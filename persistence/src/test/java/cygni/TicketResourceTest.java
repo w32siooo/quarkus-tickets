@@ -24,20 +24,43 @@ public class TicketResourceTest {
                 + "    \"eventId\" : \"ayo\",\n"
                 + "    \"quantity\" : 5\n"
                 + "}")
-        .post()
+        .post("create")
         .then()
         .statusCode(201);
+  }
+
+  @Test
+  public void testActivate() {
+
+    given()
+            .when()
+            .contentType(ContentType.JSON)
+            .body(
+                    "{\n"
+                            + "    \"userId\" : \"0d68db1b-3848-45a2-9600-d32160779ff3\",\n"
+                            + "    \"eventId\" : \"ayo\",\n"
+                            + "    \"quantity\" : 5\n"
+                            + "}")
+            .post("activate")
+            .then()
+            .statusCode(201);
   }
 
   @Test
   public void testAggregate() {
 
     given()
-            .when()
-            .param("userId","0d68db1b-3848-45a2-9600-d32160779ff3")
-            .param("eventId","ayo")
-            .get()
-            .then()
-            .statusCode(200);
+        .when()
+        .param("userId", "0d68db1b-3848-45a2-9600-d32160779ff3")
+        .param("eventId", "ayo")
+        .get()
+        .then()
+        .statusCode(200);
+  }
+
+  @Test
+  public void testHibernateValidator() {
+
+    given().when().param("eventId", "ayo").get().then().statusCode(400);
   }
 }

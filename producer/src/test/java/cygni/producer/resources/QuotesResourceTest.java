@@ -1,7 +1,7 @@
 package cygni.producer.resources;
 
 import cygni.producer.commands.TicketActivateCommand;
-import cygni.producer.commands.TicketCreateCommand;
+import cygni.producer.commands.TicketOrderCommand;
 import cygni.producer.model.TicketActivatedDto;
 import cygni.producer.model.TicketCreatedDto;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.CoreMatchers.*;
 
 @QuarkusTest
 @TestHTTPEndpoint(TicketResource.class)
@@ -24,7 +23,7 @@ public class QuotesResourceTest {
         assert given()
                 .when()
                 .contentType(ContentType.JSON)
-                .body(TicketCreateCommand.builder().eventId("123").build())
+                .body(TicketOrderCommand.builder().eventId("123").build())
                 .post("/create")
                 .then()
                 .statusCode(200)

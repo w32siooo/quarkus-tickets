@@ -3,13 +3,10 @@ package cygni.producer.processor;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import cygni.producer.model.TicketCreateEvent;
-import cygni.producer.model.TicketEventDb;
-import cygni.producer.panache.EventData;
-import cygni.producer.panache.EventType;
+import cygni.producer.model.TicketActivatedEvent;
+import cygni.producer.model.TicketOrderEvent;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -37,13 +34,27 @@ public class TicketProcessor {
   }
 
   @Incoming("ticket-orders")
-  public Uni<Void> consume(JsonObject command) {
+  public Uni<Void> consumeOrder(JsonObject command) {
 
-      TicketCreateEvent event = command.mapTo(TicketCreateEvent.class);
+      TicketOrderEvent event = command.mapTo(TicketOrderEvent.class);
 
     log.error(event.toString());
 
-    webClient.post(8085,"127.0.0.1","/hello")
+    webClient.post(8085,"127.0.0.1","/tickets/create")
+            .sendJson(event)
+            .onFailure(throwable -> log.error("failure " + throwable.getMessage()+ " " + throwable.getCause()));
+
+    return Uni.createFrom().voidItem();
+  }
+
+  @Incoming("ticket-activations")
+  public Uni<Void> consumeActivation(JsonObject command) {
+
+    TicketActivatedEvent event = command.mapTo(TicketActivatedEvent.class);
+
+    log.error(event.toString());
+
+    webClient.post(8085,"127.0.0.1","/tickets/activate")
             .sendJson(event)
             .onFailure(throwable -> log.error("failure " + throwable.getMessage()+ " " + throwable.getCause()));
 

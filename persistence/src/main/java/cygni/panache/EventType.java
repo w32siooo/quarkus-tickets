@@ -1,5 +1,5 @@
 package cygni.panache;
 
 public enum EventType {
-    TICKET_CREATED, TICKET_ACTIVATED
+    TICKET_ORDERED, TICKET_ACTIVATED, TICKET_CREATED
 }

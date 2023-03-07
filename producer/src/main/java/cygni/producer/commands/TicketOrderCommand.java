@@ -1,4 +1,4 @@
-package cygni.model;
+package cygni.producer.commands;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,7 +11,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @NoArgsConstructor
-public class TicketCreateEvent {
+public class TicketOrderCommand {
     private UUID userId;
     private String eventId;
     private Integer quantity;
