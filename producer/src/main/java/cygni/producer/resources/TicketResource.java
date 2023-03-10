@@ -78,4 +78,5 @@ public class TicketResource {
                                                 .userId(ticketActivateCommand.getUserId())
                                                 .build()));
     }
+
 }

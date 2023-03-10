@@ -9,13 +9,10 @@ import java.util.UUID;
 
 @Data
 @AllArgsConstructor
-
+@Builder
+@NoArgsConstructor
 public class TicketCreateCommand {
-
+    private UUID userId;
     private String eventId;
     private Integer quantity;
-    private UUID userId;
-
-
-
 }

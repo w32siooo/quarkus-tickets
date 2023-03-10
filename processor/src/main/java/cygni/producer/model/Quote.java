@@ -9,7 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Quote {
+public class Quote extends Hie {
 
     public String id;
     public int price;

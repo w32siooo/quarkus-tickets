@@ -18,7 +18,8 @@ quarkus:
         sql: false
     # load-script : import.sql
   http:
-    port: 8085
+    port: 8086
     test-port: 18082
     test-timeout: 10s
+
 
