@@ -1,9 +1,9 @@
 package cygni;
 
+import cygni.resources.TicketResource;
 import cygni.commands.TicketActivateCommand;
 import cygni.commands.TicketCreateCommand;
 import cygni.commands.TicketOrderCommand;
-import cygni.model.TicketActivatedEvent;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;

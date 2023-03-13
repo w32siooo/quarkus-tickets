@@ -1,7 +1,6 @@
-package cygni.panache;
+package cygni.orm;
 
 import io.quarkus.runtime.annotations.RegisterForReflection;
-import jdk.jfr.Name;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package cygni.panache;
+package cygni.orm;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

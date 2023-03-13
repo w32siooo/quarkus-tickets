@@ -1,4 +1,29 @@
 quarkus:
+  oidc:
+    client-id: backend-service
+    credentials:
+      secret: secret
+    tls-verification: none
+  keycloak:
+    policy-enforcer:
+      enable: true
+      paths:
+        1:
+          path: /api/public
+          enforcement-mode: disabled
+        2:
+          path: /api/tickets
+          enforcement-mode: disabled
+    devservices:
+      enabled: true
+      realm-path: quarkus-realm.json
+      port: 8543
+      policy-enforcer:
+        lazy-load-paths: false
+    token:
+      issuer: any
+     # users-properties-file: application-users.properties
+     # users-roles-properties-file: application-roles.properties
   datasource:
     db-kind: postgresql
     username: quarkus_test

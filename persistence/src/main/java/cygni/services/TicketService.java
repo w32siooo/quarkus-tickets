@@ -8,18 +8,16 @@ import cygni.model.TicketActivatedEvent;
 import cygni.model.TicketAggregate;
 import cygni.model.TicketCreateEvent;
 import cygni.model.TicketOrderEvent;
-import cygni.panache.EventData;
-import cygni.panache.EventType;
-import cygni.panache.TicketEventDb;
+import cygni.orm.EventData;
+import cygni.orm.EventType;
+import cygni.orm.TicketEventDb;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.unchecked.Unchecked;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.criterion.Order;
 import org.hibernate.reactive.mutiny.Mutiny;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -47,12 +45,8 @@ public class TicketService {
                                                     int availableTickets = 0;
                                                     for (TicketEventDb eventDb : resultList) {
                                                         EventData eventData;
-                                                        try {
-                                                            eventData =
-                                                                    objectMapper.readValue(eventDb.getData(), EventData.class);
-                                                        } catch (JsonProcessingException e) {
-                                                            throw new RuntimeException("Jackson kunne ikke serialisere " + e);
-                                                        }
+                                                        eventData =
+                                                                objectMapper.readValue(eventDb.getData(), EventData.class);
                                                         if (eventDb.getEventType().equals(EventType.TICKET_CREATED)) {
                                                             availableTickets += eventData.getQuantity();
                                                         }
@@ -66,11 +60,7 @@ public class TicketService {
                                                         ticketEventDb.setEventType(EventType.TICKET_ORDERED);
                                                         ticketEventDb.setUserId(UUID.fromString(ev.getUserId()));
                                                         EventData eventData = new EventData(ev.getQuantity(), UUID.fromString(ev.getUserId()));
-                                                        try {
-                                                            ticketEventDb.setData(objectMapper.writeValueAsString(eventData));
-                                                        } catch (JsonProcessingException e) {
-                                                            throw new RuntimeException("Jackson kunne ikke serialisere " + e);
-                                                        }
+                                                        ticketEventDb.setData(objectMapper.writeValueAsString(eventData));
                                                         log.info("Ticket ordered for event: " + ev.getEventId());
                                                         log.info(ticketEventDb.toString());
                                                         return ticketEventDb;
@@ -84,19 +74,14 @@ public class TicketService {
                 .onItem().transform(ticketEventDb -> OrderFulfilledDto.builder().eventId(ev.getEventId()).quantity(ev.getQuantity()).build());
     }
 
-    public Uni<TicketEventDb> createTicket(TicketCreateEvent ev) {
-        TicketEventDb ticketEventDb = new TicketEventDb();
-        ticketEventDb.setEventId(ev.getEventId());
-        ticketEventDb.setEventType(EventType.TICKET_CREATED);
-        ticketEventDb.setUserId(ev.getUserId());
-        EventData eventData = new EventData(ev.getQuantity(), ev.getUserId());
-        try {
-            ticketEventDb.setData(objectMapper.writeValueAsString(eventData));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-        return sf.withTransaction(session -> session.persist(ticketEventDb))
-                .replaceWith(Uni.createFrom().item(ticketEventDb));
+    public Uni<ResponseDto> createTicket(TicketCreateEvent ev) {
+
+        return Uni.createFrom().item(ev).map(Unchecked.function(event ->
+                        TicketEventDb.builder().eventId(event.getEventId()).data(objectMapper.writeValueAsString
+                                        (new EventData(event.getQuantity(), event.getUserId())))
+                                .eventType(EventType.TICKET_CREATED).userId(event.getUserId()).build()))
+                .flatMap(ticketEventDb -> sf.withTransaction(session -> session.persist(ticketEventDb))
+                        .replaceWith(OrderFulfilledDto.builder().eventId(ev.getEventId()).quantity(ev.getQuantity()).build()));
     }
 
     public Uni<TicketAggregate> getTicketsForUser(String eventId, UUID userId) {
@@ -126,6 +111,7 @@ public class TicketService {
 
                                                         } else if (eventDb.getEventType().equals(EventType.TICKET_ACTIVATED)) {
                                                             activatedTickets.addAndGet(eventData.getQuantity());
+                                                            inactiveTickets.addAndGet(-eventData.getQuantity());
                                                         }
                                                     });
 
@@ -151,12 +137,9 @@ public class TicketService {
                                                             int inactiveTickets = 0;
                                                             for (TicketEventDb eventDb : resultList) {
                                                                 EventData eventData;
-                                                                try {
-                                                                    eventData =
-                                                                            objectMapper.readValue(eventDb.getData(), EventData.class);
-                                                                } catch (JsonProcessingException e) {
-                                                                    throw new RuntimeException("Jackson kunne ikke serialisere " + e);
-                                                                }
+                                                                eventData =
+                                                                        objectMapper.readValue(eventDb.getData(), EventData.class);
+
                                                                 if (eventDb.getEventType().equals(EventType.TICKET_ORDERED)) {
                                                                     inactiveTickets += eventData.getQuantity();
                                                                 }
@@ -170,11 +153,8 @@ public class TicketService {
                                                                 ticketEventDb.setEventType(EventType.TICKET_ACTIVATED);
                                                                 ticketEventDb.setUserId(ev.getUserId());
                                                                 EventData eventData = new EventData(ev.getQuantity(), ev.getUserId());
-                                                                try {
                                                                     ticketEventDb.setData(objectMapper.writeValueAsString(eventData));
-                                                                } catch (JsonProcessingException e) {
-                                                                    throw new RuntimeException("Jackson kunne ikke serialisere " + e);
-                                                                }
+
                                                                 log.info("Ticket activated for event: " + ev.getEventId());
                                                                 log.info(ticketEventDb.toString());
                                                                 return ticketEventDb;

@@ -1,10 +1,9 @@
-package cygni;
+package cygni.resources;
 
 import cygni.model.FailResponseDto;
 import cygni.model.TicketActivatedEvent;
 import cygni.model.TicketCreateEvent;
 import cygni.model.TicketOrderEvent;
-import cygni.panache.TicketEventDb;
 import cygni.services.TicketService;
 import io.smallrye.mutiny.Uni;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +20,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.UUID;
 
-@Path("tickets")
+@Path("api/tickets")
 @Slf4j
 public class TicketResource {
     @Inject
@@ -29,7 +28,7 @@ public class TicketResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Uni<Response> findByUserIdAndEventId(
+    public Uni<Response> queryByUserIdAndEventId(
             @QueryParam("eventId") @NotNull String eventId, @QueryParam("userId") @NotNull UUID userId) {
         return service.getTicketsForUser(eventId, userId)
                 .onItem().ifNotNull().transform(agg -> Response.ok(agg).build())
