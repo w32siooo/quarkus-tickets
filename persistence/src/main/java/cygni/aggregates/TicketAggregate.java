@@ -1,18 +1,19 @@
 package cygni.aggregates;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import cygni.orm.EventData;
-import cygni.orm.EventType;
+import cygni.orm.TicketEventDb;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import jdk.jfr.Event;
+import io.smallrye.mutiny.unchecked.Unchecked;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Getter
@@ -31,6 +32,7 @@ public class TicketAggregate {
 
     private ZonedDateTime time;
 
+
     public TicketAggregate(String eventId) {
         this.eventId = eventId;
         this.activatedTickets = new AtomicInteger(0);
@@ -40,31 +42,33 @@ public class TicketAggregate {
         this.version = new AtomicInteger(0);
     }
 
-public Uni<Void> applyEvents(EventData events){
-        return Uni.createFrom().voidItem();
 
-}
-    public Uni<Void> applyEvent(EventData event) {
+    public void applyEvent(EventData event) {
         switch (event.getEventType()) {
             case TICKET_CREATED -> unBookedTickets.addAndGet(event.getQuantity());
             case TICKET_ORDERED -> {
                 if (unBookedTickets.get() < event.getQuantity()) {
-                    return Uni.createFrom().failure(new RuntimeException("Not enough tickets to order"));
+                    throw new RuntimeException("Not enough tickets to order");
                 }
                 inactiveTickets.addAndGet(event.getQuantity());
                 unBookedTickets.addAndGet(-event.getQuantity());
             }
             case TICKET_ACTIVATED -> {
                 if (inactiveTickets.get() < event.getQuantity()) {
-                    return Uni.createFrom().failure(new RuntimeException("Not enough tickets to activate"));
+                    throw new RuntimeException("Not enough tickets to activate");
                 }
                 activatedTickets.addAndGet(event.getQuantity());
                 inactiveTickets.addAndGet(-event.getQuantity());
             }
         }
+        log.info("unbooked tickets are now " + unBookedTickets.get());
 
         this.version.incrementAndGet();
-        return Uni.createFrom().voidItem();
+    }
+
+    TicketAggregate getCopy(){
+        return new TicketAggregate(this.eventId,this.version,this.activatedTickets,
+                this.inactiveTickets,this.unBookedTickets,ZonedDateTime.now());
     }
 
 

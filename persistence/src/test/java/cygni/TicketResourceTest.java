@@ -19,7 +19,7 @@ import static org.hamcrest.CoreMatchers.is;
 @TestHTTPEndpoint(TicketResource.class)
 public class TicketResourceTest {
 
-    @Test
+@Test
     public void testCreate() {
 
         given()
@@ -37,8 +37,19 @@ public class TicketResourceTest {
                 .statusCode(201);
     }
 
-    @Test
+   @Test
     public void testOrder() {
+       given()
+               .when()
+               .contentType(ContentType.JSON)
+               .body(TicketOrderCommand.builder()
+                       .eventId("orderTest")
+                       .quantity(5)
+                       .userId(UUID.fromString("0d68db1b-3848-45a2-9600-d32160779ff3"))
+                       .build()
+               ).post("order")
+               .then()
+               .statusCode(400);
         given()
                 .when()
                 .contentType(ContentType.JSON)
@@ -57,12 +68,23 @@ public class TicketResourceTest {
                 .contentType(ContentType.JSON)
                 .body(TicketOrderCommand.builder()
                         .eventId("orderTest")
-                        .quantity(5)
+                        .quantity(6)
                         .userId(UUID.fromString("0d68db1b-3848-45a2-9600-d32160779ff3"))
                         .build()
                 ).post("order")
                 .then()
-                .statusCode(201);
+                .statusCode(400);
+       given()
+               .when()
+               .contentType(ContentType.JSON)
+               .body(TicketOrderCommand.builder()
+                       .eventId("orderTest")
+                       .quantity(5)
+                       .userId(UUID.fromString("0d68db1b-3848-45a2-9600-d32160779ff3"))
+                       .build()
+               ).post("order")
+               .then()
+               .statusCode(201);
 
     }
 
@@ -90,17 +112,7 @@ public class TicketResourceTest {
                 .post("create")
                 .then()
                 .statusCode(201);
-        given()
-                .when()
-                .contentType(ContentType.JSON)
-                .body(TicketCreateCommand.builder()
-                        .eventId("ayo")
-                        .quantity(5)
-                        .userId(UUID.fromString("0d68db1b-3848-45a2-9600-d32160779ff3"))
-                        .build())
-                .post("create")
-                .then()
-                .statusCode(201);
+
 
         TicketAggregate res = given()
                 .when()
@@ -111,12 +123,8 @@ public class TicketResourceTest {
                 .statusCode(200)
                 .extract().body().as(TicketAggregate.class);
         assert res.getUnBookedTickets().get() == 10;
-
-
-
-
     }
-
+@Test
     public void testActivate() {
         given()
                 .when()
@@ -181,17 +189,6 @@ public class TicketResourceTest {
                 .post("activate")
                 .then()
                 .statusCode(400);
-    }
-
-    public void testAggregate() {
-
-        given()
-                .when()
-                .param("userId", "0d68db1b-3848-45a2-9600-d32160779ff3")
-                .param("eventId", "ayo")
-                .get()
-                .then()
-                .statusCode(200);
     }
 
     @Test
