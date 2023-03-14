@@ -1,5 +1,6 @@
 package cygni;
 
+import cygni.aggregates.TicketAggregate;
 import cygni.resources.TicketResource;
 import cygni.commands.TicketActivateCommand;
 import cygni.commands.TicketCreateCommand;
@@ -25,17 +26,97 @@ public class TicketResourceTest {
                 .when()
                 .contentType(ContentType.JSON)
                 .body(
-                        "{\n"
-                                + "    \"userId\" : \"0d68db1b-3848-45a2-9600-d32160779ff3\",\n"
-                                + "    \"eventId\" : \"create\",\n"
-                                + "    \"quantity\" : 5\n"
-                                + "}")
+                        TicketCreateCommand.builder()
+                                .eventId("test")
+                                .quantity(5)
+                                .userId(UUID.fromString("0d68db1b-3848-45a2-9600-d32160779ff3"))
+                                .build()
+                )
                 .post("create")
                 .then()
                 .statusCode(201);
     }
 
     @Test
+    public void testOrder() {
+        given()
+                .when()
+                .contentType(ContentType.JSON)
+                .body(TicketCreateCommand.builder()
+                        .eventId("orderTest")
+                        .quantity(5)
+                        .userId(UUID.fromString("0d68db1b-3848-45a2-9600-d32160779ff3"))
+                        .build()
+                )
+                .post("create")
+                .then()
+                .statusCode(201);
+
+        given()
+                .when()
+                .contentType(ContentType.JSON)
+                .body(TicketOrderCommand.builder()
+                        .eventId("orderTest")
+                        .quantity(5)
+                        .userId(UUID.fromString("0d68db1b-3848-45a2-9600-d32160779ff3"))
+                        .build()
+                ).post("order")
+                .then()
+                .statusCode(201);
+
+    }
+
+    @Test
+    public void testQueryByEventId() {
+        given()
+                .when()
+                .contentType(ContentType.JSON)
+                .body(TicketCreateCommand.builder()
+                        .eventId("ayo")
+                        .quantity(5)
+                        .userId(UUID.fromString("0d68db1b-3848-45a2-9600-d32160779ff3"))
+                        .build())
+                .post("create")
+                .then()
+                .statusCode(201);
+        given()
+                .when()
+                .contentType(ContentType.JSON)
+                .body(TicketCreateCommand.builder()
+                        .eventId("ayo")
+                        .quantity(5)
+                        .userId(UUID.fromString("0d68db1b-3848-45a2-9600-d32160779ff3"))
+                        .build())
+                .post("create")
+                .then()
+                .statusCode(201);
+        given()
+                .when()
+                .contentType(ContentType.JSON)
+                .body(TicketCreateCommand.builder()
+                        .eventId("ayo")
+                        .quantity(5)
+                        .userId(UUID.fromString("0d68db1b-3848-45a2-9600-d32160779ff3"))
+                        .build())
+                .post("create")
+                .then()
+                .statusCode(201);
+
+        TicketAggregate res = given()
+                .when()
+                .contentType(ContentType.JSON)
+                .param("eventId", "ayo")
+                .get("event")
+                .then()
+                .statusCode(200)
+                .extract().body().as(TicketAggregate.class);
+        assert res.getUnBookedTickets().get() == 10;
+
+
+
+
+    }
+
     public void testActivate() {
         given()
                 .when()
@@ -102,7 +183,6 @@ public class TicketResourceTest {
                 .statusCode(400);
     }
 
-    @Test
     public void testAggregate() {
 
         given()
@@ -117,6 +197,6 @@ public class TicketResourceTest {
     @Test
     public void testHibernateValidator() {
 
-        given().when().param("eventId", "ayo").get().then().statusCode(400);
+        given().when().param("eventId", "ayo").get("user").then().statusCode(400);
     }
 }

@@ -39,7 +39,7 @@ public class TicketEventDb  {
     @GeneratedValue(generator = "ticketSeq")
     private Long id;
 
-    @Column(length = 100)
+    @Column(length = 1000)
     private String data;
 
     private UUID userId;

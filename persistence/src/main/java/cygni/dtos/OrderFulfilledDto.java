@@ -1,4 +1,4 @@
-package cygni.model;
+package cygni.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

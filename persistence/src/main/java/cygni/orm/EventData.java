@@ -8,8 +8,9 @@ import java.util.UUID;
 
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 public class EventData {
-    private Integer quantity;
     private UUID userId;
+    private String eventId;
+    private Integer quantity;
+    private EventType eventType;
 }

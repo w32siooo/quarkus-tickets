@@ -1,9 +1,9 @@
 package cygni.resources;
 
-import cygni.model.FailResponseDto;
-import cygni.model.TicketActivatedEvent;
-import cygni.model.TicketCreateEvent;
-import cygni.model.TicketOrderEvent;
+import cygni.dtos.FailResponseDto;
+import cygni.events.TicketActivateEvent;
+import cygni.events.TicketCreateEvent;
+import cygni.events.TicketOrderEvent;
 import cygni.services.TicketService;
 import io.smallrye.mutiny.Uni;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +28,7 @@ public class TicketResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("user")
     public Uni<Response> queryByUserIdAndEventId(
             @QueryParam("eventId") @NotNull String eventId, @QueryParam("userId") @NotNull UUID userId) {
         return service.getTicketsForUser(eventId, userId)
@@ -35,6 +36,17 @@ public class TicketResource {
                 .onItem().ifNull().failWith(() -> new RuntimeException(String.format("Failed to find any tickets for user %s and event %s", userId, eventId)))
                 .onFailure().recoverWithItem(Response.status(Response.Status.BAD_REQUEST).entity(FailResponseDto.builder().message(String.format("Failed to find any tickets for user %s and event %s", userId, eventId)).build()).build());
     }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("event")
+    public Uni<Response> queryByEventId(@QueryParam("eventId") @NotNull String eventId) {
+        return service.getTicketsByEventId(eventId).onItem().ifNotNull().transform(agg -> Response.ok(agg).build())
+                .onItem().ifNull().failWith(() -> new RuntimeException(String.format("Failed to find any tickets for event %s", eventId)))
+                .onFailure().recoverWithItem(Response.status(Response.Status.BAD_REQUEST)
+                        .entity(FailResponseDto.builder().message(String.format("Failed to find any tickets for  event %s", eventId)).build()).build());
+    }
+
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -45,19 +57,8 @@ public class TicketResource {
                 .createTicket(create)
                 .onItem().ifNotNull().transform(response -> Response.status(Response.Status.CREATED).entity(response).build())
                 .onItem().ifNull().failWith(() -> new RuntimeException(String.format("Failed to create ticket, %s", create)))
-                .onFailure().recoverWithItem(Response.status(Response.Status.BAD_REQUEST).entity(FailResponseDto.builder().message(String.format("Failed to create ticket, %s", create)).build()).build());
-    }
-
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("activate")
-    public Uni<Response> activate(@NotNull TicketActivatedEvent activateEvent) {
-        return service
-                .activateTicket(activateEvent)
-                .onItem().ifNotNull().transform(res -> Response.status(Response.Status.CREATED).entity(res).build())
-                .onItem().ifNull().failWith(() -> new RuntimeException(String.format("Failed to activate ticket, %s", activateEvent)))
-                .onFailure().recoverWithItem(Response.status(Response.Status.BAD_REQUEST).entity(FailResponseDto.builder().message(String.format("Failed to activate ticket, %s", activateEvent)).build()).build());
+                .onFailure().recoverWithItem(Response.status(Response.Status.BAD_REQUEST)
+                        .entity(FailResponseDto.builder().message(String.format("Failed to create ticket, %s", create)).build()).build());
     }
 
     @POST
@@ -69,7 +70,22 @@ public class TicketResource {
                 .orderTicket(orderEvent)
                 .onItem().ifNotNull().transform(res -> Response.status(Response.Status.CREATED).entity(res).build())
                 .onItem().ifNull().failWith(() -> new RuntimeException(String.format("Failed to order ticket, %s", orderEvent)))
-                .onFailure().recoverWithItem(Response.status(Response.Status.BAD_REQUEST).entity(FailResponseDto.builder().message("failed to order tickets").build()).build());
+                .onFailure().recoverWithItem(Response.status(Response.Status.BAD_REQUEST)
+                        .entity(FailResponseDto.builder().message("failed to order tickets").build()).build());
     }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("activate")
+    public Uni<Response> activate(@NotNull TicketActivateEvent activateEvent) {
+        return service
+                .activateTicket(activateEvent)
+                .onItem().ifNotNull().transform(res -> Response.status(Response.Status.CREATED).entity(res).build())
+                .onItem().ifNull().failWith(() -> new RuntimeException(String.format("Failed to activate ticket, %s", activateEvent)))
+                .onFailure().recoverWithItem(Response.status(Response.Status.BAD_REQUEST)
+                        .entity(FailResponseDto.builder().message(String.format("Failed to activate ticket, %s", activateEvent)).build()).build());
+    }
+
 
 }
