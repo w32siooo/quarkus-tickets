@@ -1,6 +1,5 @@
 package cygni.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cygni.dtos.OrderFulfilledDto;
 import cygni.dtos.ResponseDto;
@@ -13,6 +12,8 @@ import cygni.orm.EventType;
 import cygni.orm.TicketEventDb;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.tuples.Tuple2;
+import io.smallrye.mutiny.tuples.Tuple3;
 import io.smallrye.mutiny.unchecked.Unchecked;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.reactive.mutiny.Mutiny;
@@ -20,7 +21,6 @@ import org.hibernate.reactive.mutiny.Mutiny;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @ApplicationScoped
 @Slf4j
@@ -35,17 +35,19 @@ public class TicketService {
         return getTicketsForUser(ev.getEventId(), ev.getUserId())
                 .map(Unchecked.function(agg ->
                 {
+                    var eventData = new EventData(ev.getUserId(), ev.getEventId(), ev.getQuantity(), ev.getEventType());
                     var event = TicketEventDb.builder().eventId(ev.getEventId()).data(objectMapper.writeValueAsString
                                     (
-                                            new EventData(ev.getUserId(), ev.getEventId(), ev.getQuantity(), ev.getEventType())
+                                            eventData
                                     )
                             )
                             .eventType(EventType.TICKET_ORDERED).userId(ev.getUserId()).build();
-                    agg.applyEvent(objectMapper.readValue(event.getData(), EventData.class));
-                    return event;
+                    return Tuple3.of(eventData, agg, event);
                 }))
+                .onItem().ifNotNull().invoke(tuple -> tuple.getItem2().applyAndValidateEvent(tuple.getItem1()))
+                .onItem().ifNull().failWith(() -> new RuntimeException("No tickets found"))
                 .flatMap(okEvent ->
-                        sf.withTransaction(session -> session.persist(okEvent))
+                        sf.withTransaction(session -> session.persist(okEvent.getItem3()))
                                 .replaceWith(OrderFulfilledDto.builder().eventId(ev.getEventId()).quantity(ev.getQuantity()).build()));
 
     }
@@ -54,17 +56,16 @@ public class TicketService {
         return getTicketsForUser(ev.getEventId(), ev.getUserId())
                 .map(Unchecked.function(agg ->
                 {
-                    var event = TicketEventDb.builder().eventId(ev.getEventId()).data(objectMapper.writeValueAsString
-                                    (
-                                            new EventData(ev.getUserId(), ev.getEventId(), ev.getQuantity(), ev.getEventType())
-                                    )
-                            )
+                    var eventData = new EventData(ev.getUserId(), ev.getEventId(), ev.getQuantity(), ev.getEventType());
+                    var event = TicketEventDb.builder().eventId(ev.getEventId())
+                            .data(objectMapper.writeValueAsString(eventData))
                             .eventType(EventType.TICKET_ACTIVATED).userId(ev.getUserId()).build();
-                    agg.applyEvent(objectMapper.readValue(event.getData(), EventData.class));
-                    return event;
+                    return Tuple3.of(eventData, agg, event);
                 }))
+                .onItem().ifNotNull().invoke(tuple -> tuple.getItem2().applyAndValidateEvent(tuple.getItem1()))
+                .onItem().ifNull().failWith(() -> new RuntimeException("No tickets found"))
                 .flatMap(okEvent ->
-                        sf.withTransaction(session -> session.persist(okEvent))
+                        sf.withTransaction(session -> session.persist(okEvent.getItem3()))
                                 .replaceWith(OrderFulfilledDto.builder().eventId(ev.getEventId()).quantity(ev.getQuantity()).build()));
     }
 
@@ -99,7 +100,7 @@ public class TicketService {
                                                         event ->
                                                                 objectMapper.readValue(event.getData(), EventData.class)
 
-                                                )).onItem().invoke(ticketAggregate::applyEvent)
+                                                )).onItem().invoke(ticketAggregate::applyAndValidateEvent)
                                                 .select().last()).toUni().replaceWith(ticketAggregate)
         );
     }
@@ -120,7 +121,7 @@ public class TicketService {
                                                         event ->
                                                                 objectMapper.readValue(event.getData(), EventData.class)
 
-                                                )).onItem().invoke(ticketAggregate::applyEvent)
+                                                )).onItem().invoke(ticketAggregate::applyAndValidateEvent)
                                                 .select().last()).toUni().replaceWith(ticketAggregate)
         );
     }
