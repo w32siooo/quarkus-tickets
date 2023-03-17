@@ -1,6 +1,12 @@
 # Compiled class file
 *.class
-
+#data
+kafka_data/
+kafka_data
+postgres_data/
+postgres_data
+zookeeper_data/
+zookeeper_data
 # Log file
 *.log
 

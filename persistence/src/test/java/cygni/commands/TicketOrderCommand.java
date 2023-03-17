@@ -12,7 +12,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TicketOrderCommand {
-    private String eventId;
+    private UUID eventId;
     private Integer quantity;
     private UUID userId;
 }

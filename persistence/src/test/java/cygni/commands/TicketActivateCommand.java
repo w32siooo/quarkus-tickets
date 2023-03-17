@@ -14,6 +14,6 @@ import java.util.UUID;
 public class TicketActivateCommand {
 
     private Integer quantity;
-    private String eventId;
+    private UUID eventId;
     private UUID userId;
 }

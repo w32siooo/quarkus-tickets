@@ -2,6 +2,7 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
       <profile name="Maven default annotation processors profile" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
@@ -20,6 +21,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="code-with-quarkus-reactive-pg" target="17" />
       <module name="orm" target="11" />
       <module name="persistence" target="17" />
       <module name="processor" target="17" />
@@ -28,6 +30,7 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="code-with-quarkus-reactive-pg" options="-parameters" />
       <module name="orm" options="-parameters" />
       <module name="persistence" options="-parameters" />
       <module name="processor" options="-parameters" />

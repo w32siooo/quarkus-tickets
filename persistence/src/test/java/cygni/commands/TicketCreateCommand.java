@@ -13,6 +13,6 @@ import java.util.UUID;
 @NoArgsConstructor
 public class TicketCreateCommand {
     private UUID userId;
-    private String eventId;
+    private UUID eventId;
     private Integer quantity;
 }

@@ -1,50 +1,82 @@
 quarkus:
-  oidc:
-    client-id: backend-service
-    credentials:
-      secret: secret
-    tls-verification: none
-  keycloak:
-    policy-enforcer:
-      enable: true
-      paths:
-        1:
-          path: /api/public
-          enforcement-mode: disabled
-        2:
-          path: /api/tickets
-          enforcement-mode: disabled
-    devservices:
-      enabled: true
-      realm-path: quarkus-realm.json
-      port: 8543
-      policy-enforcer:
-        lazy-load-paths: false
-    token:
-      issuer: any
-     # users-properties-file: application-users.properties
-     # users-roles-properties-file: application-roles.properties
+  application:
+    name: persistence
   datasource:
     db-kind: postgresql
-    username: quarkus_test
-    password: quarkus_test
+    username: postgres
+    password: postgres
     reactive:
-      url: vertx-reactive:postgresql://localhost/quarkus_test
+      url: vertx-reactive:postgresql://localhost/microservices
     devservices:
-      enabled: true
-      username: quarkus_test
-      password: quarkus_test
-      db-name: quarkus_test
-      port: 5432
+      enabled: false
+    ddl-auto: update
+  swagger-ui:
+    always-include: 'true'
+    theme: original
+  log:
+    metrics:
+      enabled: 'true'
+    console:
+      format: '%d{HH:mm:ss} %-5p traceId=%X{traceId}, parentId=%X{parentId}, spanId=%X{spanId},
+        [%c{2.}]:%L (%t) %s%e%n'
   hibernate-orm:
     database:
       generation: update
       log:
         sql: false
     # load-script : import.sql
+kafka:
+  producer:
+    retry-count: '3'
+  bootstrap:
+    servers: localhost:9093
+mp:
+  messaging:
+    outgoing:
+      eventstore-out:
+        topic: eventstore
+        key:
+          serializer: org.apache.kafka.common.serialization.StringSerializer
+        connector: smallrye-kafka
+        enable:
+          auto:
+            commit: 'false'
+        value:
+          serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+        group:
+          id: bankAccount
+    incoming:
+      eventstore-in:
+        value:
+          deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+        topic: eventstore
+        key:
+          deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        connector: smallrye-kafka
   http:
     port: 8086
     test-port: 18082
     test-timeout: 10s
+  mongodb:
+    application-name: microservices
+    credentials:
+      password: admin
+      username: admin
+smallrye:
+  faulttolerance:
+    mp-compatibility: 'true'
 
+'%test':
+    quarkus:
+      datasource:
+        db-kind: postgresql
+        username: postgres
+        password: postgres
+        reactive:
+          url: vertx-reactive:postgresql://localhost:5433/microservices
+        devservices:
+          enabled: true
+          port: 5433
+          db-kind: postgresql
+          db-name: microservices
 
