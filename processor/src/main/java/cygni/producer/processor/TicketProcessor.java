@@ -5,7 +5,6 @@ import javax.inject.Inject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import cygni.producer.model.Quote;
 import cygni.producer.model.TicketActivatedEvent;
 import cygni.producer.model.TicketCreateEvent;
 import io.smallrye.mutiny.Uni;

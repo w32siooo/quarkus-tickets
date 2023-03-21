@@ -1,6 +1,21 @@
 quarkus:
+  http:
+    access-log:
+      pattern: "...traceId=%{X,traceId} spanId=%{X,spanId}"
   application:
     name: persistence
+    http:
+      port: 8086
+      test-port: 18082
+      test-timeout: 10s
+  opentelemetry:
+    enabled: true
+    tracer:
+      exporter:
+        otlp:
+          endpoint: http://localhost:4317
+          timeout: 1000ms
+          insecure: true
   datasource:
     db-kind: postgresql
     username: postgres
@@ -17,19 +32,19 @@ quarkus:
     metrics:
       enabled: 'true'
     console:
-      format: '%d{HH:mm:ss} %-5p traceId=%X{traceId}, parentId=%X{parentId}, spanId=%X{spanId},
-        [%c{2.}]:%L (%t) %s%e%n'
+      format: '%d{HH:mm:ss} %-5p traceId=%X{traceId}, parentId=%X{parentId}, spanId=%X{spanId}, sampled=%X{sampled} [%c{2.}] (%t) %s%e%n'
   hibernate-orm:
     database:
       generation: update
       log:
         sql: false
     # load-script : import.sql
-kafka:
-  producer:
-    retry-count: '3'
-  bootstrap:
-    servers: localhost:9093
+'%dev':
+  kafka:
+    producer:
+      retry-count: '3'
+    bootstrap:
+      servers: localhost:9093
 mp:
   messaging:
     outgoing:
@@ -68,6 +83,9 @@ smallrye:
 
 '%test':
     quarkus:
+      opentelemetry:
+        tracer:
+          enabled: false
       datasource:
         db-kind: postgresql
         username: postgres
@@ -77,6 +95,9 @@ smallrye:
         devservices:
           enabled: true
           port: 5433
-          db-kind: postgresql
           db-name: microservices
-
+      kafka:
+        devservices:
+          enabled: true
+          port: 9093
+          service-name: shared-kafka

@@ -1,6 +1,8 @@
 package cygni.es;
 
 import cygni.es.exceptions.InvalidEventException;
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,10 +16,10 @@ import java.util.Objects;
 @NoArgsConstructor
 public abstract class AggregateRoot {
 
+    protected final List<Event> changes = new ArrayList<>();
     protected String id;
     protected String type;
     protected long version;
-    protected final List<Event> changes = new ArrayList<>();
 
     public AggregateRoot(final String id, final String aggregateType) {
         this.id = id;
@@ -27,12 +29,13 @@ public abstract class AggregateRoot {
 
     public abstract void when(final Event event);
 
-    public void load(final List<Event> events) {
-        events.forEach(event -> {
+    public Uni<Void> load(final List<Event> events) {
+        return Multi.createFrom().iterable(events).onItem().invoke(event -> {
             this.validateEvent(event);
             this.raiseEvent(event);
             this.version++;
-        });
+        }).collect().last().replaceWithVoid();
+
     }
 
     public void apply(final Event event) {

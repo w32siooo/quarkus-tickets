@@ -1,8 +1,9 @@
 package cygni.es;
 
 
-import cygni.orm.EventEntity;
-import cygni.orm.SnapshotEntity;
+import cygni.es.orm.EventEntity;
+import cygni.es.orm.SnapshotEntity;
+import cygni.es.mappers.EventSourcingMappers;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.unchecked.Unchecked;
@@ -23,10 +24,14 @@ import java.util.UUID;
 @Slf4j
 public class EventStore implements EventStoreDB {
 
-    private final static String LOAD_EVENTS_QUERY = "select id ,aggregate_id, aggregate_type, event_type, data, metadata, version, timestamp" +
-            " from events e where e.aggregate_id = ?1 and e.version > ?2 ORDER BY e.version ASC";
+    private final static String LOAD_EVENTS_QUERY = "select * from events e where e.aggregate_id = ?1 and e.version > ?2 ORDER BY e.version ASC";
     private final static String HANDLE_CONCURRENCY_QUERY = "SELECT aggregate_id FROM events e WHERE e.aggregate_id = ?1 LIMIT 1 FOR UPDATE";
     private final int SNAPSHOT_FREQUENCY = 3;
+
+    private final static String SAVE_SNAPSHOT_QUERY = "INSERT INTO snapshots (aggregate_id, aggregate_type, data, metadata, version, timestamp,id) " +
+            "VALUES (?1, ?2, ?3, ?4, ?5, now(), ?6) " +
+            "ON CONFLICT (aggregate_id) " +
+            "DO UPDATE SET data = $3, version = $5, timestamp = now()";
     @Inject
     EventBus eventBus;
 
@@ -40,7 +45,7 @@ public class EventStore implements EventStoreDB {
                 .setParameter(1, aggregateId)
                 .setParameter(2, version)
                 .getResultList()
-                .flatMap(EventSourcingUtils::eventsFromEntities));
+                .flatMap(EventSourcingMappers::eventsFromEntities));
     }
 
     private <T extends AggregateRoot> T getAggregate(final String aggregateId, final Class<T> aggregateType) {
@@ -63,26 +68,26 @@ public class EventStore implements EventStoreDB {
 
     @Override
     public <T extends AggregateRoot> Uni<T> load(String aggregateId, Class<T> aggregateType) {
-        var res =  getSnapshot(aggregateId).map(snapshot -> getSnapshotFromClass(snapshot, aggregateId, aggregateType))
+        return getSnapshot(aggregateId).map(snapshot -> getSnapshotFromClass(snapshot, aggregateId, aggregateType))
                 .onItem().ifNotNull().transformToUni(s -> loadEvents(aggregateId, s.getVersion())
                         .chain(events -> raiseAggregateEvents(s, events)))
                 .onItem().ifNull().failWith(Unchecked.supplier(() -> {
                     log.error("Aggregate not found: " + aggregateId + " of type: " + aggregateType.getName());
-                    throw new IllegalAccessError(aggregateId);}));
-        return res;
+                    throw new IllegalAccessError(aggregateId);
+                }));
     }
 
     private <T extends AggregateRoot> T getSnapshotFromClass(Snapshot snapshot, String aggregateId, Class<T> aggregateType) {
         if (snapshot == null) {
-            final var defaultSnapshot = EventSourcingUtils.snapshotFromAggregate(getAggregate(aggregateId, aggregateType));
-            return EventSourcingUtils.aggregateFromSnapshot(defaultSnapshot, aggregateType);
+            final var defaultSnapshot = EventSourcingMappers.snapshotFromAggregate(getAggregate(aggregateId, aggregateType));
+            return EventSourcingMappers.aggregateFromSnapshot(defaultSnapshot, aggregateType);
         }
-        return EventSourcingUtils.aggregateFromSnapshot(snapshot, aggregateType);
+        return EventSourcingMappers.aggregateFromSnapshot(snapshot, aggregateType);
     }
 
     public Uni<Snapshot> getSnapshot(String aggregateId) {
         return sf.withSession(session -> session.find(SnapshotEntity.class, UUID.fromString(aggregateId))
-                .onItem().ifNotNull().transform(EventSourcingUtils::snapshotFromEntity));
+                .onItem().ifNotNull().transform(EventSourcingMappers::snapshotFromEntity));
     }
 
     @Override
@@ -110,7 +115,7 @@ public class EventStore implements EventStoreDB {
 
     private <T extends AggregateRoot> Uni<Void> persistSnapshot(Mutiny.Session session, T aggregate) {
         aggregate.toSnapshot();
-        final var snapshot = EventSourcingUtils.snapshotFromAggregate(aggregate);
+        final var snapshot = EventSourcingMappers.snapshotFromAggregate(aggregate);
         SnapshotEntity snapshotEntity = SnapshotEntity.builder()
                 .aggregateId(snapshot.getAggregateId())
                 .aggregateType(snapshot.getAggregateType())
@@ -118,8 +123,17 @@ public class EventStore implements EventStoreDB {
                 .metadata(snapshot.getMetaData())
                 .version(snapshot.getVersion())
                 .timestamp(OffsetDateTime.now())
+                .id(UUID.randomUUID())
                 .build();
-        return session.persist(snapshotEntity).onItem().invoke(res -> log.info("Snapshot persisted"));
+        return session.createNativeQuery(SAVE_SNAPSHOT_QUERY)
+                .setParameter(1, snapshotEntity.getAggregateId())
+                .setParameter(2, snapshotEntity.getAggregateType())
+                .setParameter(3, snapshotEntity.getData())
+                .setParameter(4, snapshotEntity.getMetadata())
+                .setParameter(5, snapshotEntity.getVersion())
+                .setParameter(6, snapshotEntity.getId())
+                .executeUpdate().replaceWithVoid()
+                .onItem().invoke(res -> log.info("Snapshot persisted"));
     }
 
     public Uni<Void> persistEvents(Mutiny.Session session, List<Event> events) {

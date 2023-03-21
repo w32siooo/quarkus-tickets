@@ -2,12 +2,14 @@ package cygni;
 
 import cygni.legacy.aggregates.UserTicketAggregate;
 import cygni.legacy.resources.TicketResource;
-import cygni.commands.TicketActivateCommand;
-import cygni.commands.TicketCreateCommand;
-import cygni.commands.TicketOrderCommand;
+import cygni.legacy.commands.TicketActivateCommand;
+import cygni.legacy.commands.TicketCreateCommand;
+import cygni.legacy.commands.TicketOrderCommand;
+import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
+import io.smallrye.reactive.messaging.providers.connectors.InMemoryConnector;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
@@ -17,9 +19,13 @@ import static org.hamcrest.CoreMatchers.is;
 
 @QuarkusTest
 @TestHTTPEndpoint(TicketResource.class)
+
 public class ExperienceResourceTest {
 
-@Test
+
+
+
+    @Test
     public void testCreate() {
 
         given()
