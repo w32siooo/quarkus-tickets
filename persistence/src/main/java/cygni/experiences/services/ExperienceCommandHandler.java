@@ -2,6 +2,7 @@ package cygni.experiences.services;
 
 import cygni.es.EventStoreDB;
 import cygni.experiences.aggregates.ExperienceAggregate;
+import cygni.experiences.commands.CancelExperienceCommand;
 import cygni.experiences.commands.ChangeExperienceSeatsCommand;
 import cygni.experiences.commands.CreateExperienceCommand;
 import cygni.experiences.dtos.ExperienceCreatedDTO;
@@ -37,6 +38,15 @@ public class ExperienceCommandHandler implements ExperienceCommandService{
                 }).chain(agg->eventStoreDB.persistAndPublish(agg));
     }
 
+    @Override
+    public Uni<Void> handle(String aggregateID, CancelExperienceCommand cmd) {
+        logger.error("cancel command: " + cmd);
+        return eventStoreDB.load(aggregateID, ExperienceAggregate.class)
+                .onItem().transform(agg->{
+                    agg.cancelExperience(cmd.reason());
+                    return agg;
+                }).chain(agg->eventStoreDB.persistAndPublish(agg));
+    }
 
 
 }

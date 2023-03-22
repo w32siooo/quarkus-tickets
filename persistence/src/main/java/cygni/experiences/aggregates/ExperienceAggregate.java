@@ -3,6 +3,7 @@ package cygni.experiences.aggregates;
 import cygni.es.AggregateRoot;
 import cygni.es.Event;
 import cygni.es.SerializerUtils;
+import cygni.experiences.events.ExperienceCancelledEvent;
 import cygni.experiences.events.ExperienceCreatedEvent;
 import cygni.experiences.events.ExperienceSeatsChangedEvent;
 import lombok.AllArgsConstructor;
@@ -26,6 +27,10 @@ public class ExperienceAggregate extends AggregateRoot {
     private int price;
     private int seats;
 
+    private boolean cancelled = false;
+
+    private String notes;
+
     public ExperienceAggregate(String id) {
         super(id, AGGREGATE_TYPE);
     }
@@ -45,6 +50,13 @@ public class ExperienceAggregate extends AggregateRoot {
         this.apply(event);
     }
 
+    public void cancelExperience(String reason) {
+        final var data = new ExperienceCancelledEvent(id, reason);
+        final byte[] dataB = SerializerUtils.serializeToJsonBytes(data);
+        final var event = this.createEvent(ExperienceCancelledEvent.EXPERIENCE_CANCELLED, dataB, null);
+        this.apply(event);
+    }
+
 
     @Override
     public void when(Event event) {
@@ -53,7 +65,10 @@ public class ExperienceAggregate extends AggregateRoot {
                     handle(SerializerUtils.deserializeFromJsonBytes(event.getData(), ExperienceSeatsChangedEvent.class));
             case ExperienceCreatedEvent.EXPERIENCE_CREATED ->
                     handle(SerializerUtils.deserializeFromJsonBytes(event.getData(), ExperienceCreatedEvent.class));
-
+            case ExperienceCancelledEvent.EXPERIENCE_CANCELLED -> {
+                this.cancelled = true;
+                this.notes = this.notes + "\n" + SerializerUtils.deserializeFromJsonBytes(event.getData(), ExperienceCancelledEvent.class).getReason();
+            }
             default -> throw new IllegalArgumentException("Unknown event type: " + event.getClass().getSimpleName());
         }
     }

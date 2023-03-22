@@ -21,10 +21,6 @@ import static org.hamcrest.CoreMatchers.is;
 @TestHTTPEndpoint(TicketResource.class)
 
 public class ExperienceResourceTest {
-
-
-
-
     @Test
     public void testCreate() {
 

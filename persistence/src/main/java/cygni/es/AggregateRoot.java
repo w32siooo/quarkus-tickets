@@ -66,9 +66,6 @@ public abstract class AggregateRoot {
         this.clearChanges();
     }
 
-    public String string() {
-        return String.format("id: {%s}, type: {%s}, version: {%s}, changes: {%s}", id, type, version, changes.size());
-    }
 
     private void validateEvent(final Event event) {
         if (Objects.isNull(event) || !event.getAggregateId().equals(this.id))
@@ -90,11 +87,14 @@ public abstract class AggregateRoot {
 
     @Override
     public String toString() {
-        return "AggregateRoot{" +
-                "id='" + id + '\'' +
-                ", type='" + type + '\'' +
-                ", version=" + version +
-                ", changes=" + changes.size() +
-                '}';
+        return String.format("""
+                AggregateRoot{
+                    id='%s',
+                    type='%s',
+                    version=%s,
+                    changes=%s
+                }""", id, type, version, changes.size());
+
+
     }
 }

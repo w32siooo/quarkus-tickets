@@ -3,7 +3,7 @@ package cygni.es;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
-public final class Constants {
+public final class Constants  {
 
     public static final String AGGREGATE_ID = "aggregate_id";
     public static final String SNAPSHOT_ID = "snapshot_id";

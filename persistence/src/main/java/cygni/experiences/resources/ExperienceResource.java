@@ -1,5 +1,7 @@
 package cygni.experiences.resources;
 
+import cygni.experiences.commands.CancelExperienceCommand;
+import cygni.experiences.dtos.CancelExperienceDTO;
 import cygni.legacy.dtos.ChangeExperienceSeatsDTO;
 import cygni.experiences.aggregates.ExperienceAggregate;
 import cygni.experiences.commands.ChangeExperienceSeatsCommand;
@@ -18,6 +20,7 @@ import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.PATCH;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -65,6 +68,16 @@ public class ExperienceResource {
     @CircuitBreaker(requestVolumeThreshold = 30, delay = 3000, failureRatio = 0.6)
     public Uni<Response> changeExperienceSeats(@PathParam("aggregateID") String aggregateID, @Valid ChangeExperienceSeatsDTO dto ){
         final var command = new ChangeExperienceSeatsCommand(dto.getNewSeats());
+        return commandService.handle(aggregateID,command).map(s->Response.status(202).entity(s).build());
+    }
+
+    @PATCH
+    @Path("{aggregateID}")
+    @Retry(maxRetries = 3, delay = 300)
+    @Timeout(value = 5000)
+    @CircuitBreaker(requestVolumeThreshold = 30, delay = 3000, failureRatio = 0.6)
+    public Uni<Response> cancelExperience(@PathParam("aggregateID") String aggregateID, @Valid CancelExperienceDTO dto){
+        final var command = new CancelExperienceCommand(aggregateID, dto.reason());
         return commandService.handle(aggregateID,command).map(s->Response.status(202).entity(s).build());
     }
 

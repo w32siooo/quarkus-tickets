@@ -2,6 +2,7 @@ package cygni.experiences.resources;
 
 import com.oracle.svm.core.annotate.Inject;
 import cygni.KafkaTestResourceLifecycleManager;
+import cygni.experiences.dtos.CancelExperienceDTO;
 import cygni.experiences.dtos.CreateExperienceRequestDTO;
 import cygni.experiences.dtos.ExperienceCreatedDTO;
 import cygni.legacy.dtos.ChangeExperienceSeatsDTO;
@@ -75,6 +76,31 @@ public class ExperienceResourceTest {
                         new ChangeExperienceSeatsDTO(5)
                 )
                 .post(res.aggregateID())
+                .then()
+                .statusCode(202);
+    }
+
+    @Test
+    void cancelExperience(){
+        var res = given()
+                .when()
+                .contentType(ContentType.JSON)
+                .body(
+                        new CreateExperienceRequestDTO("Rema", "roskilde", "2022-07-01", 5, 5)
+                )
+                .post()
+                .then()
+                .statusCode(201)
+                .extract()
+                .response()
+                .as(ExperienceCreatedDTO.class);
+        given()
+                .when()
+                .contentType(ContentType.JSON)
+                .body(
+                        new CancelExperienceDTO("The artist is not coming")
+                )
+                .patch(res.aggregateID())
                 .then()
                 .statusCode(202);
     }
