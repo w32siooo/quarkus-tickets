@@ -7,6 +7,7 @@ import cygni.es.mappers.EventSourcingMappers;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.unchecked.Unchecked;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.reactive.mutiny.Mutiny;
 
@@ -75,6 +76,18 @@ public class EventStore implements EventStoreDB {
                     log.error("Aggregate not found: " + aggregateId + " of type: " + aggregateType.getName());
                     throw new IllegalAccessError(aggregateId);
                 }));
+    }
+
+    public <T extends AggregateRoot> Uni<List<T>> loadAll(Class<T> aggregateClass, String aggregateName)  {
+        return sf.withSession(session -> session.createNativeQuery("select * from snapshots where aggregate_type = ?1", SnapshotEntity.class)
+                .setParameter(1, aggregateName)
+                .getResultList()
+                .flatMap(s-> Multi.createFrom().iterable(s)
+                                .onItem().transform(EventSourcingMappers::snapshotFromEntity)
+                                .onItem().transformToUniAndConcatenate(snap -> loadEvents(snap.getAggregateId(), snap.getVersion())
+                                        .chain(events -> raiseAggregateEvents(getSnapshotFromClass(snap, snap.getAggregateId(), aggregateClass), events)))
+                                .collect().asList()
+                ));
     }
 
     private <T extends AggregateRoot> T getSnapshotFromClass(Snapshot snapshot, String aggregateId, Class<T> aggregateType) {

@@ -2,15 +2,12 @@ package cygni.experiences.resources;
 
 import cygni.experiences.commands.CancelExperienceCommand;
 import cygni.experiences.dtos.CancelExperienceDTO;
-import cygni.legacy.dtos.ChangeExperienceSeatsDTO;
-import cygni.experiences.aggregates.ExperienceAggregate;
+import cygni.experiences.dtos.ChangeExperienceSeatsDTO;
 import cygni.experiences.commands.ChangeExperienceSeatsCommand;
 import cygni.experiences.commands.CreateExperienceCommand;
 import cygni.experiences.dtos.CreateExperienceRequestDTO;
-import cygni.experiences.dtos.ExperienceCreatedDTO;
 import cygni.experiences.services.ExperienceCommandService;
 import cygni.experiences.services.ExperienceQueryService;
-import io.netty.handler.codec.http.HttpResponseStatus;
 import io.smallrye.mutiny.Uni;
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 import org.eclipse.microprofile.faulttolerance.Retry;
@@ -50,6 +47,23 @@ public class ExperienceResource {
         return queryService.getExperience(aggregateID).map(s->Response.status(200).entity(s).build());
     }
 
+    /**
+     * @return all experiences that have an active snapshot.
+     */
+    @GET
+    @Path("")
+    @Retry(maxRetries = 3, delay = 300)
+    @Timeout(value = 5000)
+    @CircuitBreaker(requestVolumeThreshold = 30, delay = 3000, failureRatio = 0.6)
+    public Uni<Response> getAllExperiences(){
+        return queryService.getAllExperiences().map(s->Response.status(200).entity(s).build());
+    }
+
+    /**
+     * Create experience.
+     * @param dto
+     * @return status code and response dto.
+     */
 
     @POST
     @Retry(maxRetries = 3, delay = 300)
@@ -62,17 +76,17 @@ public class ExperienceResource {
     }
 
     @POST
-    @Path("{aggregateID}")
+    @Path("{aggregateID}/changeSeats")
     @Retry(maxRetries = 3, delay = 300)
     @Timeout(value = 5000)
     @CircuitBreaker(requestVolumeThreshold = 30, delay = 3000, failureRatio = 0.6)
     public Uni<Response> changeExperienceSeats(@PathParam("aggregateID") String aggregateID, @Valid ChangeExperienceSeatsDTO dto ){
-        final var command = new ChangeExperienceSeatsCommand(dto.getNewSeats());
+        final var command = new ChangeExperienceSeatsCommand(dto.newSeats());
         return commandService.handle(aggregateID,command).map(s->Response.status(202).entity(s).build());
     }
 
-    @PATCH
-    @Path("{aggregateID}")
+    @POST
+    @Path("{aggregateID}/cancel")
     @Retry(maxRetries = 3, delay = 300)
     @Timeout(value = 5000)
     @CircuitBreaker(requestVolumeThreshold = 30, delay = 3000, failureRatio = 0.6)

@@ -27,6 +27,8 @@ public abstract class AggregateRoot {
     }
 
 
+
+
     public abstract void when(final Event event);
 
     public Uni<Void> load(final List<Event> events) {

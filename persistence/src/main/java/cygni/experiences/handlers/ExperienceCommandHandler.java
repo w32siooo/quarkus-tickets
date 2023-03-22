@@ -1,4 +1,4 @@
-package cygni.experiences.services;
+package cygni.experiences.handlers;
 
 import cygni.es.EventStoreDB;
 import cygni.experiences.aggregates.ExperienceAggregate;
@@ -6,6 +6,7 @@ import cygni.experiences.commands.CancelExperienceCommand;
 import cygni.experiences.commands.ChangeExperienceSeatsCommand;
 import cygni.experiences.commands.CreateExperienceCommand;
 import cygni.experiences.dtos.ExperienceCreatedDTO;
+import cygni.experiences.services.ExperienceCommandService;
 import io.smallrye.mutiny.Uni;
 import org.jboss.logging.Logger;
 
@@ -13,7 +14,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.UUID;
 @ApplicationScoped
-public class ExperienceCommandHandler implements ExperienceCommandService{
+public class ExperienceCommandHandler implements ExperienceCommandService {
 
     private final static Logger logger = Logger.getLogger(ExperienceCommandHandler.class);
     @Inject
