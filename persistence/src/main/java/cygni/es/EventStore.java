@@ -26,9 +26,9 @@ import java.util.UUID;
 public class EventStore implements EventStoreDB {
 
     private final static String LOAD_EVENTS_QUERY = "select * from events e where e.aggregate_id = ?1 and e.version > ?2 ORDER BY e.version ASC";
-    private final static String HANDLE_CONCURRENCY_QUERY = "SELECT aggregate_id FROM events e WHERE e.aggregate_id = ?1 LIMIT 1 FOR UPDATE";
+    private final static String HANDLE_CONCURRENCY_QUERY = "SELECT CAST(aggregate_id as varchar) FROM events e WHERE e.aggregate_id = ?1 LIMIT 1 FOR UPDATE";
 
-    private final static String LOAD_DISTINCT_AGG_IDS_QUERY = "select distinct aggregate_id from events where aggregate_type = ?1";
+    private final static String LOAD_DISTINCT_AGG_IDS_QUERY = "select distinct CAST(aggregate_id as varchar) from events where aggregate_type = ?1";
     private final int SNAPSHOT_FREQUENCY = 3;
 
     private final static String SAVE_SNAPSHOT_QUERY = "INSERT INTO snapshots (aggregate_id, aggregate_type, data, metadata, version, timestamp,id) " +
@@ -43,7 +43,7 @@ public class EventStore implements EventStoreDB {
     Mutiny.SessionFactory sf;
 
     @Override
-    public Uni<List<Event>> loadEvents(String aggregateId, long version) {
+    public Uni<List<Event>> loadEvents(UUID aggregateId, long version) {
         return sf.withSession(session -> session.createNativeQuery(LOAD_EVENTS_QUERY, EventEntity.class)
                 .setParameter(1, aggregateId)
                 .setParameter(2, version)
@@ -51,9 +51,9 @@ public class EventStore implements EventStoreDB {
                 .flatMap(EventSourcingMappers::eventsFromEntities));
     }
 
-    private <T extends AggregateRoot> T getAggregate(final String aggregateId, final Class<T> aggregateType) {
+    private <T extends AggregateRoot> T getAggregate(final UUID aggregateId, final Class<T> aggregateType) {
         try {
-            return aggregateType.getConstructor(String.class).newInstance(aggregateId);
+            return aggregateType.getConstructor(UUID.class).newInstance(aggregateId);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
                  NoSuchMethodException e) {
             throw new RuntimeException(e);
@@ -70,13 +70,13 @@ public class EventStore implements EventStoreDB {
     }
 
     @Override
-    public <T extends AggregateRoot> Uni<T> load(String aggregateId, Class<T> aggregateType) {
+    public <T extends AggregateRoot> Uni<T> load(UUID aggregateId, Class<T> aggregateType) {
         return getSnapshot(aggregateId).map(snapshot -> getSnapshotFromClass(snapshot, aggregateId, aggregateType))
                 .onItem().ifNotNull().transformToUni(s -> loadEvents(aggregateId, s.getVersion())
                         .chain(events -> raiseAggregateEvents(s, events)))
                 .onItem().ifNull().failWith(Unchecked.supplier(() -> {
                     log.error("Aggregate not found: " + aggregateId + " of type: " + aggregateType.getName());
-                    throw new IllegalAccessError(aggregateId);
+                    throw new IllegalAccessError(aggregateId.toString());
                 }));
     }
 
@@ -85,7 +85,7 @@ public class EventStore implements EventStoreDB {
                 .setParameter(1, aggregateName)
                 .getResultList()
                 .flatMap(s-> Multi.createFrom().iterable(s)
-                                .onItem().transformToUni(aggregateId -> load(aggregateId,aggregateClass))
+                                .onItem().transformToUni(aggregateId -> load(UUID.fromString(aggregateId),aggregateClass))
                         .concatenate().collect().asList()
 
                 ));
@@ -93,7 +93,7 @@ public class EventStore implements EventStoreDB {
 
 
 
-    private <T extends AggregateRoot> T getSnapshotFromClass(Snapshot snapshot, String aggregateId, Class<T> aggregateType) {
+    private <T extends AggregateRoot> T getSnapshotFromClass(Snapshot snapshot, UUID aggregateId, Class<T> aggregateType) {
         if (snapshot == null) {
             final var defaultSnapshot = EventSourcingMappers.snapshotFromAggregate(getAggregate(aggregateId, aggregateType));
             return EventSourcingMappers.aggregateFromSnapshot(defaultSnapshot, aggregateType);
@@ -101,15 +101,15 @@ public class EventStore implements EventStoreDB {
         return EventSourcingMappers.aggregateFromSnapshot(snapshot, aggregateType);
     }
 
-    public Uni<Snapshot> getSnapshot(String aggregateId) {
-        return sf.withSession(session -> session.find(SnapshotEntity.class, UUID.fromString(aggregateId))
+    public Uni<Snapshot> getSnapshot(UUID aggregateId) {
+        return sf.withSession(session -> session.find(SnapshotEntity.class, aggregateId)
                 .onItem().ifNotNull().transform(EventSourcingMappers::snapshotFromEntity));
     }
 
     @Override
     public <T extends AggregateRoot> Uni<Void> persistAndPublish(T aggregate) {
         final List<Event> changes = new ArrayList<>(aggregate.getChanges());
-        return sf.withTransaction(session -> session.createNativeQuery(HANDLE_CONCURRENCY_QUERY, String.class)
+        return sf.withTransaction(session -> session.createNativeQuery(HANDLE_CONCURRENCY_QUERY, UUID.class)
                         .setParameter(1, aggregate.getId())
                         .getResultList()
                         .chain(s -> persistEvents(session, changes)).onItem().invoke(res -> log.info("Events persisted"))
@@ -123,7 +123,7 @@ public class EventStore implements EventStoreDB {
 
 
     @Override
-    public Uni<Boolean> exists(String aggregateId) {
+    public Uni<Boolean> exists(UUID aggregateId) {
         return sf.withSession(session ->
                 session.find(EventEntity.class, aggregateId).onItem()
                         .transform(Objects::nonNull));

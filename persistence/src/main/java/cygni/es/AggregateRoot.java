@@ -11,17 +11,18 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 public abstract class AggregateRoot implements Aggregate {
 
     protected final List<Event> changes = new ArrayList<>();
-    protected String id;
+    protected UUID id;
     protected String type;
     protected long version;
 
-    public AggregateRoot(final String id, final String aggregateType) {
+    public AggregateRoot(final UUID id, final String aggregateType) {
         this.id = id;
         this.type = aggregateType;
     }

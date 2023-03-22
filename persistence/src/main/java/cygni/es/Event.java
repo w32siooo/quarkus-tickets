@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Type;
 
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
@@ -23,8 +24,8 @@ public class Event {
     }
 
     private UUID id;
-
-    private String aggregateId;
+    @Type(type="pg-uuid")
+    private UUID aggregateId;
 
     private String eventType;
 

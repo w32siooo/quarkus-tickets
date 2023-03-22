@@ -25,7 +25,7 @@ public class EventEntity {
     private UUID id;
 
     @Column(name = "aggregate_id", nullable = false)
-    private String aggregateId;
+    private UUID aggregateId;
 
     @Column(name = "aggregate_type", nullable = false)
     private String aggregateType;

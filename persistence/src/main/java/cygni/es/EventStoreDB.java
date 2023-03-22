@@ -3,17 +3,18 @@ package cygni.es;
 import io.smallrye.mutiny.Uni;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface EventStoreDB {
 
-    Uni<List<Event>> loadEvents(final String aggregateId, long version);
+    Uni<List<Event>> loadEvents(final UUID aggregateId, long version);
 
     <T extends AggregateRoot> Uni<Void> persistAndPublish(final T aggregate);
 
 
-    <T extends AggregateRoot> Uni<T> load(final String aggregateId, final Class<T> aggregateType);
+    <T extends AggregateRoot> Uni<T> load(final UUID aggregateId, final Class<T> aggregateType);
 
-    Uni<Boolean> exists(final String aggregateId);
+    Uni<Boolean> exists(final UUID aggregateId);
 
 
 

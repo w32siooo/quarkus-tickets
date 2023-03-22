@@ -27,6 +27,8 @@ import javax.ws.rs.core.Response;
 
 import org.jboss.logging.Logger;
 
+import java.util.UUID;
+
 @Path("/api/v1/tickets")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -43,7 +45,7 @@ public class ExperienceResource {
     @Retry(maxRetries = 3, delay = 300)
     @Timeout(value = 5000)
     @CircuitBreaker(requestVolumeThreshold = 30, delay = 3000, failureRatio = 0.6)
-    public Uni<Response> getExperience(@PathParam("aggregateID") String aggregateID){
+    public Uni<Response> getExperience(@PathParam("aggregateID") UUID aggregateID){
         return queryService.getExperience(aggregateID).map(s->Response.status(200).entity(s).build());
     }
 
@@ -80,7 +82,7 @@ public class ExperienceResource {
     @Retry(maxRetries = 3, delay = 300)
     @Timeout(value = 5000)
     @CircuitBreaker(requestVolumeThreshold = 30, delay = 3000, failureRatio = 0.6)
-    public Uni<Response> changeExperienceSeats(@PathParam("aggregateID") String aggregateID, @Valid ChangeExperienceSeatsDTO dto ){
+    public Uni<Response> changeExperienceSeats(@PathParam("aggregateID") UUID aggregateID, @Valid ChangeExperienceSeatsDTO dto ){
         final var command = new ChangeExperienceSeatsCommand(dto.newSeats());
         return commandService.handle(aggregateID,command).map(s->Response.status(202).entity(s).build());
     }
@@ -90,7 +92,7 @@ public class ExperienceResource {
     @Retry(maxRetries = 3, delay = 300)
     @Timeout(value = 5000)
     @CircuitBreaker(requestVolumeThreshold = 30, delay = 3000, failureRatio = 0.6)
-    public Uni<Response> cancelExperience(@PathParam("aggregateID") String aggregateID, @Valid CancelExperienceDTO dto){
+    public Uni<Response> cancelExperience(@PathParam("aggregateID") UUID aggregateID, @Valid CancelExperienceDTO dto){
         final var command = new CancelExperienceCommand(aggregateID, dto.reason());
         return commandService.handle(aggregateID,command).map(s->Response.status(202).entity(s).build());
     }

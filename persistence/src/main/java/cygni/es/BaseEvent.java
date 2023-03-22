@@ -10,9 +10,9 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 public abstract class BaseEvent {
-    protected String aggregateId;
+    protected UUID aggregateId;
 
-    public BaseEvent(String aggregateId) {
+    public BaseEvent(UUID aggregateId) {
 
         this.aggregateId = aggregateId;
     }

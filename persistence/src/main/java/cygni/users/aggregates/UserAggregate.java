@@ -7,7 +7,6 @@ import lombok.Getter;
 import java.util.List;
 
 public class UserAggregate extends AggregateRoot {
-    @Getter
     public static final String AGGREGATE_TYPE = "User";
 
     private String name;

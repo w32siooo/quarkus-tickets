@@ -21,16 +21,16 @@ public class ExperienceCommandHandler implements ExperienceCommandService {
     EventStoreDB eventStoreDB;
     @Override
     public Uni<ExperienceCreatedDTO> handle(CreateExperienceCommand cmd) {
-        final var aggregate = new ExperienceAggregate(UUID.randomUUID().toString());
+        final var aggregate = new ExperienceAggregate(UUID.randomUUID());
         aggregate.createExperience(cmd.artist(), cmd.venue(), cmd.date(), cmd.price(), cmd.seats());
         logger.infof("created experience: %s", aggregate);
         return eventStoreDB.persistAndPublish(aggregate).replaceWith(new ExperienceCreatedDTO(aggregate.getArtist(), aggregate.getVenue(),
-                aggregate.getDate(), aggregate.getPrice(), aggregate.getSeats(), aggregate.getId()))
+                aggregate.getDate(), aggregate.getPrice(), aggregate.getSeats(), aggregate.getId().toString()))
                 .onItem().invoke(() -> logger.infof("created experience: %s", aggregate));
     }
 
     @Override
-    public Uni<Void> handle(String aggregateID, ChangeExperienceSeatsCommand cmd) {
+    public Uni<Void> handle(UUID aggregateID, ChangeExperienceSeatsCommand cmd) {
         logger.error("change seats command: " + cmd.newSeats());
         return eventStoreDB.load(aggregateID, ExperienceAggregate.class)
                 .onItem().transform(agg->{
@@ -40,7 +40,7 @@ public class ExperienceCommandHandler implements ExperienceCommandService {
     }
 
     @Override
-    public Uni<Void> handle(String aggregateID, CancelExperienceCommand cmd) {
+    public Uni<Void> handle(UUID aggregateID, CancelExperienceCommand cmd) {
         logger.error("cancel command: " + cmd);
         return eventStoreDB.load(aggregateID, ExperienceAggregate.class)
                 .onItem().transform(agg->{

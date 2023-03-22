@@ -1,9 +1,10 @@
 package cygni.es;
 
-public interface Aggregate {
-    String getAGGREGATE_TYPE();
+import java.util.UUID;
 
-    String getId();
+public interface Aggregate {
+
+    UUID getId();
 
     String getType();
 

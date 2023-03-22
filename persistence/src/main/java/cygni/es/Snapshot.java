@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Type;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -16,8 +17,8 @@ import java.util.UUID;
 public class Snapshot {
 
     private UUID id;
-
-    private String aggregateId;
+    @Type(type="pg-uuid")
+    private UUID aggregateId;
 
 
     private String aggregateType;

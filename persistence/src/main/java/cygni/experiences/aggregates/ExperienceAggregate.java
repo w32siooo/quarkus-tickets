@@ -14,6 +14,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.UUID;
+
 @EqualsAndHashCode(callSuper = false)
 @Data
 @NoArgsConstructor
@@ -21,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ExperienceAggregate extends AggregateRoot  {
 
-    @Getter
     public static final String AGGREGATE_TYPE = "Experience";
 
     private String artist;
@@ -34,7 +35,7 @@ public class ExperienceAggregate extends AggregateRoot  {
 
     private String notes;
 
-    public ExperienceAggregate(String id) {
+    public ExperienceAggregate(UUID id) {
         super(id, AGGREGATE_TYPE);
     }
 

@@ -1,4 +1,6 @@
 package cygni.experiences.commands;
 
-public record CancelExperienceCommand(  String aggregateID, String reason) {
+import java.util.UUID;
+
+public record CancelExperienceCommand(UUID aggregateID, String reason) {
 }

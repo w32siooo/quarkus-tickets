@@ -8,6 +8,7 @@ import io.smallrye.mutiny.Uni;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.List;
+import java.util.UUID;
 
 @ApplicationScoped
 public class ExperienceQueryHandler implements ExperienceQueryService {
@@ -16,7 +17,7 @@ public class ExperienceQueryHandler implements ExperienceQueryService {
     EventStore eventStore;
 
     @Override
-    public Uni<ExperienceAggregate> getExperience(String id) {
+    public Uni<ExperienceAggregate> getExperience(UUID id) {
         return eventStore.load(id ,ExperienceAggregate.class);
     }
 

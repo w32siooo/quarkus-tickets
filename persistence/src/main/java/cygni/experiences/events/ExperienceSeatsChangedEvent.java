@@ -5,6 +5,8 @@ import cygni.experiences.aggregates.ExperienceAggregate;
 import lombok.Data;
 import lombok.Getter;
 
+import java.util.UUID;
+
 @Getter
 public class ExperienceSeatsChangedEvent extends BaseEvent {
 
@@ -14,7 +16,7 @@ public class ExperienceSeatsChangedEvent extends BaseEvent {
 
     private final int newSeats;
 
-    public ExperienceSeatsChangedEvent(String aggregateId, int newSeats){
+    public ExperienceSeatsChangedEvent(UUID aggregateId, int newSeats){
         super(aggregateId);
         this.newSeats = newSeats;
     }
