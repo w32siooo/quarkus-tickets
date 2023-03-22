@@ -48,7 +48,7 @@ public class ExperienceResource {
     }
 
     /**
-     * @return all experiences that have an active snapshot.
+     * @return all experiences, this is an expensive query as it essentially calls getExperience n times.
      */
     @GET
     @Path("")

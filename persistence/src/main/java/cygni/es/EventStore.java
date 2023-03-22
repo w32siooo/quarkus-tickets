@@ -27,6 +27,8 @@ public class EventStore implements EventStoreDB {
 
     private final static String LOAD_EVENTS_QUERY = "select * from events e where e.aggregate_id = ?1 and e.version > ?2 ORDER BY e.version ASC";
     private final static String HANDLE_CONCURRENCY_QUERY = "SELECT aggregate_id FROM events e WHERE e.aggregate_id = ?1 LIMIT 1 FOR UPDATE";
+
+    private final static String LOAD_DISTINCT_AGG_IDS_QUERY = "select distinct aggregate_id from events where aggregate_type = ?1";
     private final int SNAPSHOT_FREQUENCY = 3;
 
     private final static String SAVE_SNAPSHOT_QUERY = "INSERT INTO snapshots (aggregate_id, aggregate_type, data, metadata, version, timestamp,id) " +
@@ -79,16 +81,17 @@ public class EventStore implements EventStoreDB {
     }
 
     public <T extends AggregateRoot> Uni<List<T>> loadAll(Class<T> aggregateClass, String aggregateName)  {
-        return sf.withSession(session -> session.createNativeQuery("select * from snapshots where aggregate_type = ?1", SnapshotEntity.class)
+        return sf.withSession(session -> session.createNativeQuery(LOAD_DISTINCT_AGG_IDS_QUERY,String.class)
                 .setParameter(1, aggregateName)
                 .getResultList()
                 .flatMap(s-> Multi.createFrom().iterable(s)
-                                .onItem().transform(EventSourcingMappers::snapshotFromEntity)
-                                .onItem().transformToUniAndConcatenate(snap -> loadEvents(snap.getAggregateId(), snap.getVersion())
-                                        .chain(events -> raiseAggregateEvents(getSnapshotFromClass(snap, snap.getAggregateId(), aggregateClass), events)))
-                                .collect().asList()
+                                .onItem().transformToUni(aggregateId -> load(aggregateId,aggregateClass))
+                        .concatenate().collect().asList()
+
                 ));
     }
+
+
 
     private <T extends AggregateRoot> T getSnapshotFromClass(Snapshot snapshot, String aggregateId, Class<T> aggregateType) {
         if (snapshot == null) {

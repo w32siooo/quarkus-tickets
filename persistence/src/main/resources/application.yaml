@@ -1,13 +1,13 @@
 quarkus:
-  http:
-    access-log:
-      pattern: "...traceId=%{X,traceId} spanId=%{X,spanId}"
   application:
     name: persistence
     http:
       port: 8086
       test-port: 18082
       test-timeout: 10s
+  http:
+    access-log:
+      pattern: "...traceId=%{X,traceId} spanId=%{X,spanId}"
   opentelemetry:
     enabled: true
     tracer:

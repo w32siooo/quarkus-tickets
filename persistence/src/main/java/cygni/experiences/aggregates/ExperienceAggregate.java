@@ -1,5 +1,6 @@
 package cygni.experiences.aggregates;
 
+import cygni.es.Aggregate;
 import cygni.es.AggregateRoot;
 import cygni.es.Event;
 import cygni.es.SerializerUtils;
@@ -9,6 +10,7 @@ import cygni.experiences.events.ExperienceSeatsChangedEvent;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,8 +19,9 @@ import lombok.extern.slf4j.Slf4j;
 @NoArgsConstructor
 @AllArgsConstructor
 @Slf4j
-public class ExperienceAggregate extends AggregateRoot {
+public class ExperienceAggregate extends AggregateRoot  {
 
+    @Getter
     public static final String AGGREGATE_TYPE = "Experience";
 
     private String artist;

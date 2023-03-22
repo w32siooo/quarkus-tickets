@@ -14,7 +14,7 @@ import java.util.Objects;
 
 @Data
 @NoArgsConstructor
-public abstract class AggregateRoot {
+public abstract class AggregateRoot implements Aggregate {
 
     protected final List<Event> changes = new ArrayList<>();
     protected String id;
@@ -25,8 +25,6 @@ public abstract class AggregateRoot {
         this.id = id;
         this.type = aggregateType;
     }
-
-
 
 
     public abstract void when(final Event event);

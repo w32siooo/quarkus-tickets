@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Getter
 @Setter
 public class EventAggregate extends AggregateRoot {
+
     private AtomicInteger unBookedTickets;
     private AtomicInteger bookedTickets;
     private UUID eventId;
@@ -42,5 +43,10 @@ public class EventAggregate extends AggregateRoot {
     public void when(Event event) {
 
 
+    }
+
+    @Override
+    public String getAGGREGATE_TYPE() {
+        return null;
     }
 }
