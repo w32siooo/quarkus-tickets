@@ -1,19 +1,20 @@
 package cygni.experiences.aggregates;
 
-import cygni.es.Aggregate;
 import cygni.es.AggregateRoot;
 import cygni.es.Event;
 import cygni.es.SerializerUtils;
+import cygni.experiences.events.ExperienceBookedEvent;
 import cygni.experiences.events.ExperienceCancelledEvent;
 import cygni.experiences.events.ExperienceCreatedEvent;
-import cygni.experiences.events.ExperienceSeatsChangedEvent;
+import cygni.experiences.events.ExperienceTotalSeatsChangedEvent;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @EqualsAndHashCode(callSuper = false)
@@ -29,14 +30,19 @@ public class ExperienceAggregate extends AggregateRoot  {
     private String venue;
     private String date;
     private int price;
-    private int seats;
+    private int totalSeats;
+
+    private int availableSeats;
+
+    private int soldSeats;
 
     private boolean cancelled = false;
 
-    private String notes;
+    private List<String> notes;
 
     public ExperienceAggregate(UUID id) {
         super(id, AGGREGATE_TYPE);
+        notes = new ArrayList<>();
     }
 
     public void createExperience(String artist, String venue, String date, int price, int seats) {
@@ -47,10 +53,10 @@ public class ExperienceAggregate extends AggregateRoot  {
         this.apply(event);
     }
 
-    public void changeSeats(int newSeats){
-        final var data = new ExperienceSeatsChangedEvent(id,newSeats);
+    public void changeTotalSeats(int newSeats){
+        final var data = new ExperienceTotalSeatsChangedEvent(id,newSeats);
         final byte[] dataB = SerializerUtils.serializeToJsonBytes(data);
-        final var event = this.createEvent(ExperienceSeatsChangedEvent.EXPERIENCE_SEATS_CHANGED_EVENTS,dataB,null);
+        final var event = this.createEvent(ExperienceTotalSeatsChangedEvent.EXPERIENCE_TOTAL_SEATS_CHANGED,dataB,null);
         this.apply(event);
     }
 
@@ -61,17 +67,33 @@ public class ExperienceAggregate extends AggregateRoot  {
         this.apply(event);
     }
 
+    public void bookExperience(UUID userId, int seats){
+        if (seats > availableSeats) throw new IllegalArgumentException("Not enough seats available");
+        if (cancelled) throw new IllegalArgumentException("Experience is cancelled");
+
+        final var data = new ExperienceBookedEvent(id, userId, seats);
+        final byte[] dataB = SerializerUtils.serializeToJsonBytes(data);
+        final var event = this.createEvent(ExperienceBookedEvent.EXPERIENCE_BOOKED, dataB, null);
+        this.apply(event);
+    }
+
 
     @Override
     public void when(Event event) {
-        switch (event.getEventType()) {
-            case ExperienceSeatsChangedEvent.EXPERIENCE_SEATS_CHANGED_EVENTS ->
-                    handle(SerializerUtils.deserializeFromJsonBytes(event.getData(), ExperienceSeatsChangedEvent.class));
+        switch (event.getType()) {
+            case ExperienceTotalSeatsChangedEvent.EXPERIENCE_TOTAL_SEATS_CHANGED ->
+                    handle(SerializerUtils.deserializeFromJsonBytes(event.getData(), ExperienceTotalSeatsChangedEvent.class));
             case ExperienceCreatedEvent.EXPERIENCE_CREATED ->
                     handle(SerializerUtils.deserializeFromJsonBytes(event.getData(), ExperienceCreatedEvent.class));
+            case ExperienceBookedEvent.EXPERIENCE_BOOKED -> {
+                final var experienceBookedEvent = SerializerUtils.deserializeFromJsonBytes(event.getData(), ExperienceBookedEvent.class);
+                this.soldSeats += experienceBookedEvent.getSeats();
+                this.availableSeats = this.totalSeats - this.soldSeats;
+                notes.add("Booked by " + experienceBookedEvent.getUserId());
+            }
             case ExperienceCancelledEvent.EXPERIENCE_CANCELLED -> {
                 this.cancelled = true;
-                this.notes = this.notes + "\n" + SerializerUtils.deserializeFromJsonBytes(event.getData(), ExperienceCancelledEvent.class).getReason();
+                notes.add("Cancellation reason: " +SerializerUtils.deserializeFromJsonBytes(event.getData(), ExperienceCancelledEvent.class).getReason());
             }
             default -> throw new IllegalArgumentException("Unknown event type: " + event.getClass().getSimpleName());
         }
@@ -82,10 +104,10 @@ public class ExperienceAggregate extends AggregateRoot  {
         this.venue = event.getVenue();
         this.date = event.getDate();
         this.price = event.getPrice();
-        this.seats = event.getSeats();
+        this.totalSeats = event.getSeats();
     }
 
-    private void handle(ExperienceSeatsChangedEvent event) {
-        this.seats = event.getNewSeats();
+    private void handle(ExperienceTotalSeatsChangedEvent event) {
+        this.totalSeats = event.getNewSeats();
     }
 }

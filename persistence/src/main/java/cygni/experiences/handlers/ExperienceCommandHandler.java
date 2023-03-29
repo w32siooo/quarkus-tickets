@@ -2,6 +2,7 @@ package cygni.experiences.handlers;
 
 import cygni.es.EventStoreDB;
 import cygni.experiences.aggregates.ExperienceAggregate;
+import cygni.experiences.commands.BookExperienceCommand;
 import cygni.experiences.commands.CancelExperienceCommand;
 import cygni.experiences.commands.ChangeExperienceSeatsCommand;
 import cygni.experiences.commands.CreateExperienceCommand;
@@ -19,13 +20,15 @@ public class ExperienceCommandHandler implements ExperienceCommandService {
     private final static Logger logger = Logger.getLogger(ExperienceCommandHandler.class);
     @Inject
     EventStoreDB eventStoreDB;
+
+
     @Override
     public Uni<ExperienceCreatedDTO> handle(CreateExperienceCommand cmd) {
         final var aggregate = new ExperienceAggregate(UUID.randomUUID());
         aggregate.createExperience(cmd.artist(), cmd.venue(), cmd.date(), cmd.price(), cmd.seats());
         logger.infof("created experience: %s", aggregate);
         return eventStoreDB.persistAndPublish(aggregate).replaceWith(new ExperienceCreatedDTO(aggregate.getArtist(), aggregate.getVenue(),
-                aggregate.getDate(), aggregate.getPrice(), aggregate.getSeats(), aggregate.getId().toString()))
+                aggregate.getDate(), aggregate.getPrice(), aggregate.getTotalSeats(), aggregate.getId().toString()))
                 .onItem().invoke(() -> logger.infof("created experience: %s", aggregate));
     }
 
@@ -34,7 +37,7 @@ public class ExperienceCommandHandler implements ExperienceCommandService {
         logger.error("change seats command: " + cmd.newSeats());
         return eventStoreDB.load(aggregateID, ExperienceAggregate.class)
                 .onItem().transform(agg->{
-                    agg.changeSeats(cmd.newSeats());
+                    agg.changeTotalSeats(cmd.newSeats());
                     return agg;
                 }).chain(agg->eventStoreDB.persistAndPublish(agg));
     }
@@ -45,6 +48,15 @@ public class ExperienceCommandHandler implements ExperienceCommandService {
         return eventStoreDB.load(aggregateID, ExperienceAggregate.class)
                 .onItem().transform(agg->{
                     agg.cancelExperience(cmd.reason());
+                    return agg;
+                }).chain(agg->eventStoreDB.persistAndPublish(agg));
+    }
+
+    @Override
+    public Uni<Void> handle(UUID aggregateID, BookExperienceCommand cmd) {
+        return eventStoreDB.load(aggregateID, ExperienceAggregate.class)
+                .onItem().transform(agg->{
+                    agg.bookExperience(cmd.userID(),cmd.seats());
                     return agg;
                 }).chain(agg->eventStoreDB.persistAndPublish(agg));
     }

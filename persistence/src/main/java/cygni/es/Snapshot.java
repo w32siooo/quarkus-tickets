@@ -17,7 +17,7 @@ import java.util.UUID;
 public class Snapshot {
 
     private UUID id;
-    @Type(type="pg-uuid")
+    @Type(type="org.hibernate.type.PostgresUUIDType")
     private UUID aggregateId;
 
 

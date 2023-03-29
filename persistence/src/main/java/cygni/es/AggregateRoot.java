@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -78,7 +77,7 @@ public abstract class AggregateRoot implements Aggregate {
                 .aggregateId(this.getId())
                 .version(this.getVersion())
                 .aggregateType(this.getType())
-                .eventType(eventType)
+                .type(eventType)
                 .data(Objects.isNull(data) ? new byte[]{} : data)
                 .metadata(Objects.isNull(metadata) ? new byte[]{} : metadata)
                 .timestamp(OffsetDateTime.now())

@@ -7,7 +7,6 @@ import cygni.es.mappers.EventSourcingMappers;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.unchecked.Unchecked;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.reactive.mutiny.Mutiny;
 
@@ -85,7 +84,7 @@ public class EventStore implements EventStoreDB {
                 .setParameter(1, aggregateName)
                 .getResultList()
                 .flatMap(s-> Multi.createFrom().iterable(s)
-                                .onItem().transformToUni(aggregateId -> load(UUID.fromString(aggregateId),aggregateClass))
+                                .onItem().transformToUni(aggregateId -> load((UUID.fromString(aggregateId)),aggregateClass))
                         .concatenate().collect().asList()
 
                 ));
@@ -157,7 +156,7 @@ public class EventStore implements EventStoreDB {
                 EventEntity.builder()
                         .aggregateId(event.getAggregateId())
                         .aggregateType(event.getAggregateType())
-                        .eventType(event.getEventType())
+                        .eventType(event.getType())
                         .data(event.getData())
                         .metadata(event.getMetadata())
                         .version(event.getVersion())

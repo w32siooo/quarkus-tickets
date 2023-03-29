@@ -53,7 +53,7 @@ public class EventSourcingMappers {
                 .id(entity.getId())
                 .aggregateId(entity.getAggregateId())
                 .aggregateType(entity.getAggregateType())
-                .eventType(entity.getEventType())
+                .type(entity.getEventType())
                 .data(entity.getData())
                 .metadata(entity.getMetadata())
                 .version(entity.getVersion())

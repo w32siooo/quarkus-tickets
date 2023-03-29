@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Type;
 
 import java.time.OffsetDateTime;
-import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @Data
@@ -16,18 +15,18 @@ import java.util.UUID;
 @Builder
 public class Event {
 
-    public Event(String eventType, String aggregateType) {
+    public Event(String type, String aggregateType) {
         this.id = UUID.randomUUID();
-        this.eventType = eventType;
+        this.type = type;
         this.aggregateType = aggregateType;
         this.timestamp = OffsetDateTime.now();
     }
 
     private UUID id;
-    @Type(type="pg-uuid")
+    @Type(type="org.hibernate.type.PostgresUUIDType")
     private UUID aggregateId;
 
-    private String eventType;
+    private String type;
 
     private String aggregateType;
 

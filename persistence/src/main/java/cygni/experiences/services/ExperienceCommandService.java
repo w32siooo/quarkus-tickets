@@ -1,5 +1,6 @@
 package cygni.experiences.services;
 
+import cygni.experiences.commands.BookExperienceCommand;
 import cygni.experiences.commands.CancelExperienceCommand;
 import cygni.experiences.commands.ChangeExperienceSeatsCommand;
 import cygni.experiences.commands.CreateExperienceCommand;
@@ -16,4 +17,6 @@ public interface ExperienceCommandService {
      Uni<Void> handle (UUID aggregateID, final ChangeExperienceSeatsCommand cmd);
 
      Uni<Void> handle (UUID aggregateID, final CancelExperienceCommand cmd);
+
+     Uni<Void> handle (UUID aggregateID, final BookExperienceCommand cmd);
 }
