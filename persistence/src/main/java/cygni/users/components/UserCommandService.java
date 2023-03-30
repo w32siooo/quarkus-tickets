@@ -1,14 +1,16 @@
 package cygni.users.components;
 
 import cygni.users.dtos.BuyTicketDTO;
+import cygni.users.dtos.CreateNewUserDTO;
+import cygni.users.dtos.RemoveTicketDTO;
 import io.smallrye.mutiny.Uni;
 
 import java.util.UUID;
 
 public interface UserCommandService {
 
-    Uni<Void> handle(String name, Long balance);
+    Uni<Void> handle(CreateNewUserDTO createUserDTO);
     Uni<Void> handle(UUID aggregateId ,BuyTicketDTO buyTicketDTO);
-    Uni<Void> removeTicket(UUID userId, UUID experienceId);
-    Uni<Void> handle(UUID userId, Long newBalance);
+    Uni<Void> handle(UUID aggregateId, RemoveTicketDTO removeTicketDTO);
+    Uni<Void> handle(UUID aggregateId, Long newBalance);
 }

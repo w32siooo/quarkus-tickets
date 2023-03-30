@@ -85,6 +85,7 @@ public class ExperienceAggregate extends AggregateRoot  {
                     handle(SerializerUtils.deserializeFromJsonBytes(event.getData(), ExperienceTotalSeatsChangedEvent.class));
             case ExperienceCreatedEvent.EXPERIENCE_CREATED ->
                     handle(SerializerUtils.deserializeFromJsonBytes(event.getData(), ExperienceCreatedEvent.class));
+
             case ExperienceBookedEvent.EXPERIENCE_BOOKED -> {
                 final var experienceBookedEvent = SerializerUtils.deserializeFromJsonBytes(event.getData(), ExperienceBookedEvent.class);
                 this.soldSeats += experienceBookedEvent.getSeats();
@@ -95,7 +96,7 @@ public class ExperienceAggregate extends AggregateRoot  {
                 this.cancelled = true;
                 notes.add("Cancellation reason: " +SerializerUtils.deserializeFromJsonBytes(event.getData(), ExperienceCancelledEvent.class).getReason());
             }
-            default -> throw new IllegalArgumentException("Unknown event type: " + event.getClass().getSimpleName());
+            default -> throw new IllegalArgumentException("Unknown event type: " + event.getType());
         }
     }
 
@@ -109,5 +110,6 @@ public class ExperienceAggregate extends AggregateRoot  {
 
     private void handle(ExperienceTotalSeatsChangedEvent event) {
         this.totalSeats = event.getNewSeats();
+        this.availableSeats = this.totalSeats - this.soldSeats;
     }
 }

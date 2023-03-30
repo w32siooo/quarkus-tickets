@@ -45,6 +45,9 @@ quarkus:
       retry-count: '3'
     bootstrap:
       servers: localhost:9093
+  quarkus:
+    http:
+      port: 8086
 mp:
   messaging:
     outgoing:
