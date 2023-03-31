@@ -1,6 +1,7 @@
 package cygni.users.components;
 
 import cygni.es.EventStore;
+import cygni.es.dto.RequestAcceptedDTO;
 import cygni.experiences.aggregates.ExperienceAggregate;
 import cygni.users.aggregates.UserAggregate;
 import cygni.users.dtos.BuyTicketDTO;
@@ -19,15 +20,15 @@ public class UserCommandHandler implements UserCommandService {
     EventStore eventStore;
 
     @Override
-    public Uni<Void> handle(CreateNewUserDTO createUserDTO) {
+    public Uni<RequestAcceptedDTO> handle(CreateNewUserDTO createUserDTO) {
         UUID id = UUID.randomUUID();
         UserAggregate userAggregate = new UserAggregate(id);
         userAggregate.createNewUser(createUserDTO.name(), createUserDTO.balance());
-        return eventStore.persistAndPublish(userAggregate);
+        return eventStore.persistAndPublish(userAggregate).map(ignored -> new RequestAcceptedDTO("user created",id));
     }
 
     @Override
-    public Uni<Void> handle(UUID aggregateId, BuyTicketDTO buyTicketDTO) {
+    public Uni<RequestAcceptedDTO> handle(UUID aggregateId, BuyTicketDTO buyTicketDTO) {
 
         return eventStore.load(buyTicketDTO.experienceId(), ExperienceAggregate.class).onItem().transformToUni(expAgg -> {
             var userAgg = eventStore.load(aggregateId, UserAggregate.class).onItem().transform(aggregate -> {
@@ -40,24 +41,24 @@ public class UserCommandHandler implements UserCommandService {
             UserAggregate userAgg = tuple.getItem2();
             expAgg.bookExperience(aggregateId, buyTicketDTO.seats());
             return Uni.combine().all().unis(eventStore.persistAndPublish(expAgg), eventStore.persistAndPublish(userAgg)).asTuple();
-        }).onItem().transformToUni(tuple -> Uni.createFrom().voidItem());
+        }).onItem().transform(tuple -> new RequestAcceptedDTO("ticket bought", aggregateId));
     }
 
     @Override
-    public Uni<Void> handle(UUID aggregateId,RemoveTicketDTO removeTicketDTO) {
+    public Uni<RequestAcceptedDTO> handle(UUID aggregateId, RemoveTicketDTO removeTicketDTO) {
 
         return eventStore.load(aggregateId, UserAggregate.class).onItem().transformToUni(aggregate -> {
             aggregate.removeExperience(removeTicketDTO.experienceId());
-            return eventStore.persistAndPublish(aggregate);
+            return eventStore.persistAndPublish(aggregate).map(ignored -> new RequestAcceptedDTO("ticket removed", aggregateId));
         });
     }
 
     @Override
-    public Uni<Void> handle(UUID userId, Long newBalance) {
+    public Uni<RequestAcceptedDTO> handle(UUID userId, Long newBalance) {
 
         return eventStore.load(userId, UserAggregate.class).onItem().transformToUni(aggregate -> {
             aggregate.depositBalance(newBalance);
-            return eventStore.persistAndPublish(aggregate);
+            return eventStore.persistAndPublish(aggregate).map(ignored -> new RequestAcceptedDTO("balance updated", userId));
         });
     }
 }

@@ -51,8 +51,8 @@ quarkus:
 mp:
   messaging:
     outgoing:
-      eventstore-out:
-        topic: eventstore
+      event-store-out:
+        topic: event-store
         key:
           serializer: org.apache.kafka.common.serialization.StringSerializer
         connector: smallrye-kafka
@@ -62,12 +62,12 @@ mp:
         value:
           serializer: org.apache.kafka.common.serialization.ByteArraySerializer
         group:
-          id: bankAccount
+          id: tickets
     incoming:
-      eventstore-in:
+      event-store-in:
         value:
           deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
-        topic: eventstore
+        topic: event-store
         key:
           deserializer: org.apache.kafka.common.serialization.StringDeserializer
         connector: smallrye-kafka

@@ -22,16 +22,15 @@ public class KafkaEventBus implements EventBus {
     @Inject
     KafkaClientService kafkaClientService;
 
-    @ConfigProperty(name = "mp.messaging.incoming.eventstore-in.topic", defaultValue = "eventstore")
+    @ConfigProperty(name = "mp.messaging.incoming.event-store-in.topic", defaultValue = "event-store")
     String eventStoreTopic;
 
-    
     public Uni<Void> publish(List<Event> events) {
         final byte[] eventsBytes = SerializerUtils.serializeToJsonBytes(events.toArray(new Event[]{}));
         final ProducerRecord<String, byte[]> record = new ProducerRecord<>(eventStoreTopic, eventsBytes);
         logger.infof("publish kafka record value >>>>> %s", new String(record.value()));
 
-        return kafkaClientService.<String, byte[]>getProducer("eventstore-out")
+        return kafkaClientService.<String, byte[]>getProducer("event-store-out")
                 .send(record)
                 .ifNoItem().after(Duration.ofMillis(PUBLISH_TIMEOUT)).fail()
                 .onFailure().invoke(Throwable::printStackTrace)

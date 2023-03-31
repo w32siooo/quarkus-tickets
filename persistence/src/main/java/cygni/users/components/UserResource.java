@@ -16,6 +16,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.util.UUID;
 
 @Path("api/v1/users")
@@ -31,34 +32,34 @@ public class UserResource {
 
     @POST
     @Path("create")
-    public Uni<Void> createNewUser(@Valid CreateNewUserDTO dto){
+    public Uni<Response> createNewUser(@Valid CreateNewUserDTO dto){
 
-        return commandService.handle(dto);
+        return commandService.handle(dto).map(s->Response.status(201).entity(s).build());
     }
 
     @POST
     @Path("{userId}/experiences/{experienceId}/add")
-    public Uni<Void> addExperience(@NotNull @PathParam("userId") UUID userId, @NotNull @PathParam("experienceId") UUID experienceId){
+    public Uni<Response> addExperience(@NotNull @PathParam("userId") UUID userId, @NotNull @PathParam("experienceId") UUID experienceId){
         BuyTicketDTO dto = new BuyTicketDTO(experienceId, 1, 1L);
-        return commandService.handle(userId,dto);
+        return commandService.handle(userId,dto).map(s->Response.status(201).entity(s).build());
     }
 
     @POST
     @Path("{userId}/experiences/{experienceId}/remove")
-    public Uni<Void> removeExperience(@NotNull @PathParam("userId") UUID userId, @NotNull @PathParam("experienceId")  UUID experienceId){
+    public Uni<Response> removeExperience(@NotNull @PathParam("userId") UUID userId, @NotNull @PathParam("experienceId")  UUID experienceId){
         var dto = new RemoveTicketDTO(experienceId);
-        return commandService.handle(userId,dto);
+        return commandService.handle(userId,dto).map(s->Response.status(201).entity(s).build());
     }
 
     @POST
     @Path("{userId}/deposit/{toAdd}")
-    public Uni<Void> depositBalance(@NotNull @PathParam("userId") UUID userId, @NotNull @PathParam("toAdd") Long toAdd){
-        return commandService.handle(userId, toAdd);
+    public Uni<Response> depositBalance(@NotNull @PathParam("userId") UUID userId, @NotNull @PathParam("toAdd") Long toAdd){
+        return commandService.handle(userId, toAdd).map(s->Response.status(201).entity(s).build());
     }
 
     @GET
     @Path("{userId}")
-    public Uni<UserViewDTO> getUser(@NotNull @PathParam("userId") UUID userId){
-        return queryService.handle(userId);
+    public Uni<Response> getUser(@NotNull @PathParam("userId") UUID userId){
+        return queryService.handle(userId).map(s->Response.status(200).entity(s).build());
     }
 }

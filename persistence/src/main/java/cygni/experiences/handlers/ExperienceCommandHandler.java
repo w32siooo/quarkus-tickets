@@ -1,6 +1,7 @@
 package cygni.experiences.handlers;
 
 import cygni.es.EventStoreDB;
+import cygni.es.dto.RequestAcceptedDTO;
 import cygni.experiences.aggregates.ExperienceAggregate;
 import cygni.experiences.commands.BookExperienceCommand;
 import cygni.experiences.commands.CancelExperienceCommand;
@@ -14,6 +15,7 @@ import org.jboss.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.UUID;
+
 @ApplicationScoped
 public class ExperienceCommandHandler implements ExperienceCommandService {
 
@@ -28,37 +30,40 @@ public class ExperienceCommandHandler implements ExperienceCommandService {
         aggregate.createExperience(cmd.artist(), cmd.venue(), cmd.date(), cmd.price(), cmd.seats());
         logger.infof("created experience: %s", aggregate);
         return eventStoreDB.persistAndPublish(aggregate).replaceWith(new ExperienceCreatedDTO(aggregate.getArtist(), aggregate.getVenue(),
-                aggregate.getDate(), aggregate.getPrice(), aggregate.getTotalSeats(), aggregate.getId().toString()))
+                        aggregate.getDate(), aggregate.getPrice(), aggregate.getTotalSeats(), aggregate.getId().toString()))
                 .onItem().invoke(() -> logger.infof("created experience: %s", aggregate));
     }
 
     @Override
-    public Uni<Void> handle(UUID aggregateID, ChangeExperienceSeatsCommand cmd) {
+    public Uni<RequestAcceptedDTO> handle(UUID aggregateID, ChangeExperienceSeatsCommand cmd) {
         logger.error("change seats command: " + cmd.newSeats());
         return eventStoreDB.load(aggregateID, ExperienceAggregate.class)
-                .onItem().transform(agg->{
+                .onItem().transform(agg -> {
                     agg.changeTotalSeats(cmd.newSeats());
                     return agg;
-                }).chain(agg->eventStoreDB.persistAndPublish(agg));
+                }).chain(agg -> eventStoreDB.persistAndPublish(agg))
+                .map(agg -> new RequestAcceptedDTO("total seats changed", aggregateID));
     }
 
     @Override
-    public Uni<Void> handle(UUID aggregateID, CancelExperienceCommand cmd) {
+    public Uni<RequestAcceptedDTO> handle(UUID aggregateID, CancelExperienceCommand cmd) {
         logger.error("cancel command: " + cmd);
         return eventStoreDB.load(aggregateID, ExperienceAggregate.class)
-                .onItem().transform(agg->{
+                .onItem().transform(agg -> {
                     agg.cancelExperience(cmd.reason());
                     return agg;
-                }).chain(agg->eventStoreDB.persistAndPublish(agg));
+                }).chain(agg -> eventStoreDB.persistAndPublish(agg))
+                .map(agg -> new RequestAcceptedDTO("experience cancelled", aggregateID));
     }
 
     @Override
-    public Uni<Void> handle(UUID aggregateID, BookExperienceCommand cmd) {
+    public Uni<RequestAcceptedDTO> handle(UUID aggregateID, BookExperienceCommand cmd) {
         return eventStoreDB.load(aggregateID, ExperienceAggregate.class)
-                .onItem().transform(agg->{
-                    agg.bookExperience(cmd.userID(),cmd.seats());
+                .onItem().transform(agg -> {
+                    agg.bookExperience(cmd.userID(), cmd.seats());
                     return agg;
-                }).chain(agg->eventStoreDB.persistAndPublish(agg));
+                }).chain(agg -> eventStoreDB.persistAndPublish(agg))
+                .map(agg -> new RequestAcceptedDTO("experience booked", aggregateID));
     }
 
 

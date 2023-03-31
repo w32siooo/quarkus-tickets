@@ -3,6 +3,7 @@ package cygni.experiences.aggregates;
 import cygni.es.AggregateRoot;
 import cygni.es.Event;
 import cygni.es.SerializerUtils;
+import cygni.experiences.dtos.ExperienceAggregateViewDTO;
 import cygni.experiences.events.ExperienceBookedEvent;
 import cygni.experiences.events.ExperienceCancelledEvent;
 import cygni.experiences.events.ExperienceCreatedEvent;
@@ -98,6 +99,10 @@ public class ExperienceAggregate extends AggregateRoot  {
             }
             default -> throw new IllegalArgumentException("Unknown event type: " + event.getType());
         }
+    }
+
+    public ExperienceAggregateViewDTO toDTO() {
+        return new ExperienceAggregateViewDTO(id, artist, venue, date, price, totalSeats, availableSeats, soldSeats, cancelled, notes.toArray(new String[0]));
     }
 
     private void handle(ExperienceCreatedEvent event) {
