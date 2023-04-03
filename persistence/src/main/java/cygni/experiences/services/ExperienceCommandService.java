@@ -1,6 +1,6 @@
 package cygni.experiences.services;
 
-import cygni.core.eventsourcing.dto.RequestAcceptedDTO;
+import cygni.es.dto.RequestAcceptedDTO;
 import cygni.experiences.commands.BookExperienceCommand;
 import cygni.experiences.commands.CancelExperienceCommand;
 import cygni.experiences.commands.ChangeExperienceSeatsCommand;

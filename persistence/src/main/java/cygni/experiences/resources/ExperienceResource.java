@@ -8,9 +8,10 @@ import cygni.experiences.dtos.ChangeExperienceSeatsDTO;
 import cygni.experiences.dtos.CreateExperienceRequestDTO;
 import cygni.experiences.services.ExperienceCommandService;
 import cygni.experiences.services.ExperienceQueryService;
+import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
 import java.util.UUID;
-import javax.inject.Inject;
+import javax.annotation.security.RolesAllowed;import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -26,6 +27,7 @@ import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.jboss.logging.Logger;
 
 @Path("/api/v1/tickets")
+@Authenticated
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class ExperienceResource {
@@ -39,6 +41,7 @@ public class ExperienceResource {
   @Retry(maxRetries = 3, delay = 300)
   @Timeout(value = 5000)
   @CircuitBreaker(requestVolumeThreshold = 30, delay = 3000, failureRatio = 0.6)
+  @RolesAllowed({"system", "admin"})
   public Uni<Response> getExperience(@PathParam("aggregateID") UUID aggregateID) {
     return queryService.getExperience(aggregateID).map(s -> Response.status(200).entity(s).build());
   }
@@ -52,6 +55,7 @@ public class ExperienceResource {
   @Retry(maxRetries = 3, delay = 300)
   @Timeout(value = 5000)
   @CircuitBreaker(requestVolumeThreshold = 30, delay = 3000, failureRatio = 0.6)
+  @RolesAllowed({"system", "admin"})
   public Uni<Response> getAllExperiences() {
     return queryService.getAllExperiences().map(s -> Response.status(200).entity(s).build());
   }
@@ -66,6 +70,7 @@ public class ExperienceResource {
   @Retry(maxRetries = 3, delay = 300)
   @Timeout(value = 5000)
   @CircuitBreaker(requestVolumeThreshold = 30, delay = 3000, failureRatio = 0.6)
+  @RolesAllowed({"system", "admin"})
   public Uni<Response> createExperience(@Valid CreateExperienceRequestDTO dto) {
     final var command =
         new CreateExperienceCommand(
@@ -79,6 +84,7 @@ public class ExperienceResource {
   @Retry(maxRetries = 3, delay = 300)
   @Timeout(value = 5000)
   @CircuitBreaker(requestVolumeThreshold = 30, delay = 3000, failureRatio = 0.6)
+  @RolesAllowed({"system", "admin"})
   public Uni<Response> changeExperienceSeats(
       @PathParam("aggregateID") UUID aggregateID, @Valid ChangeExperienceSeatsDTO dto) {
     final var command = new ChangeExperienceSeatsCommand(dto.newSeats());
@@ -92,6 +98,7 @@ public class ExperienceResource {
   @Retry(maxRetries = 3, delay = 300)
   @Timeout(value = 5000)
   @CircuitBreaker(requestVolumeThreshold = 30, delay = 3000, failureRatio = 0.6)
+  @RolesAllowed({"system", "admin"})
   public Uni<Response> cancelExperience(
       @PathParam("aggregateID") UUID aggregateID, @Valid CancelExperienceDTO dto) {
     final var command = new CancelExperienceCommand(aggregateID, dto.reason());

@@ -1,8 +1,8 @@
 package cygni.users.aggregates;
 
-import cygni.core.eventsourcing.AggregateRoot;
-import cygni.core.eventsourcing.Event;
-import cygni.core.eventsourcing.SerializerUtils;
+import cygni.es.AggregateRoot;
+import cygni.es.Event;
+import cygni.es.SerializerUtils;
 import cygni.users.dtos.UserViewDTO;
 import java.util.ArrayList;
 import java.util.List;

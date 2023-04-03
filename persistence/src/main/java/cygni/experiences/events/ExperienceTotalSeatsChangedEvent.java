@@ -1,6 +1,6 @@
 package cygni.experiences.events;
 
-import cygni.core.eventsourcing.BaseEvent;
+import cygni.es.BaseEvent;
 import cygni.experiences.aggregates.ExperienceAggregate;
 import java.util.UUID;
 import lombok.Getter;

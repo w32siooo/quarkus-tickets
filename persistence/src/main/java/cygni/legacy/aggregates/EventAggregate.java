@@ -1,6 +1,6 @@
 package cygni.legacy.aggregates;
 
-import cygni.core.eventsourcing.Event;
+import cygni.es.Event;
 import cygni.legacy.EventData;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;

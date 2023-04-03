@@ -1,9 +1,12 @@
 package cygni.users.components;
 
 import cygni.users.dtos.BuyTicketDTO;
-import cygni.users.dtos.CreateNewUserDTO;
+import cygni.users.commands.CreateNewUserCommand;
 import cygni.users.dtos.RemoveTicketDTO;
-import io.smallrye.mutiny.Uni;
+import io.quarkus.security.Authenticated;
+import io.smallrye.mutiny.Uni;import org.keycloak.KeycloakSecurityContext;
+import org.keycloak.common.util.KeycloakUriBuilder;
+import org.keycloak.models.KeycloakContext;
 import java.util.UUID;
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -20,6 +23,7 @@ import javax.ws.rs.core.Response;
 @Path("api/v1/users")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
+@Authenticated
 public class UserResource {
 
   @Inject UserCommandService commandService;
@@ -28,9 +32,10 @@ public class UserResource {
 
   @POST
   @Path("create")
-  public Uni<Response> createNewUser(@Valid CreateNewUserDTO dto) {
+  public Uni<Response> createNewUser(@Valid CreateNewUserCommand cmd) {
 
-    return commandService.handle(dto).map(s -> Response.status(201).entity(s).build());
+
+    return commandService.handle(cmd).map(s -> Response.status(201).entity(s).build());
   }
 
   @POST

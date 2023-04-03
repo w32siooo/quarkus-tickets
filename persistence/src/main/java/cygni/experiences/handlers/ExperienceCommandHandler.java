@@ -1,7 +1,7 @@
 package cygni.experiences.handlers;
 
-import cygni.core.eventsourcing.EventStoreDB;
-import cygni.core.eventsourcing.dto.RequestAcceptedDTO;
+import cygni.es.EventStoreDB;
+import cygni.es.dto.RequestAcceptedDTO;
 import cygni.experiences.aggregates.ExperienceAggregate;
 import cygni.experiences.commands.BookExperienceCommand;
 import cygni.experiences.commands.CancelExperienceCommand;

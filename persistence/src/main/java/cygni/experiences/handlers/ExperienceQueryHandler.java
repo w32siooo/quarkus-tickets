@@ -1,6 +1,6 @@
 package cygni.experiences.handlers;
 
-import cygni.core.eventsourcing.EventStore;
+import cygni.es.EventStore;
 import cygni.experiences.aggregates.ExperienceAggregate;
 import cygni.experiences.dtos.ExperienceAggregateViewDTO;
 import cygni.experiences.services.ExperienceQueryService;

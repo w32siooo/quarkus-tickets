@@ -1,11 +1,11 @@
 package cygni.users.components;
 
-import cygni.core.eventsourcing.EventStore;
-import cygni.core.eventsourcing.dto.RequestAcceptedDTO;
+import cygni.es.EventStore;
+import cygni.es.dto.RequestAcceptedDTO;
 import cygni.experiences.aggregates.ExperienceAggregate;
 import cygni.users.aggregates.UserAggregate;
 import cygni.users.dtos.BuyTicketDTO;
-import cygni.users.dtos.CreateNewUserDTO;
+import cygni.users.commands.CreateNewUserCommand;
 import cygni.users.dtos.RemoveTicketDTO;
 import io.smallrye.mutiny.Uni;
 import java.util.UUID;
@@ -18,7 +18,7 @@ public class UserCommandHandler implements UserCommandService {
   @Inject EventStore eventStore;
 
   @Override
-  public Uni<RequestAcceptedDTO> handle(CreateNewUserDTO createUserDTO) {
+  public Uni<RequestAcceptedDTO> handle(CreateNewUserCommand createUserDTO) {
     UUID id = UUID.randomUUID();
     UserAggregate userAggregate = new UserAggregate(id);
     userAggregate.createNewUser(createUserDTO.name(), createUserDTO.balance());

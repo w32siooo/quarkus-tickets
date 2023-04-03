@@ -48,6 +48,19 @@ quarkus:
   quarkus:
     http:
       port: 8086
+    oidc:
+      auth-server-url: http://localhost:8543/realms/quarkus
+      client-id: backend-service
+      token:
+        issuer: any
+      credentials:
+        secret: secret
+        token-path: realm.json
+      tls:
+        verification: none
+    keycloak:
+      policy-enforcer:
+        enable: true
 mp:
   messaging:
     outgoing:

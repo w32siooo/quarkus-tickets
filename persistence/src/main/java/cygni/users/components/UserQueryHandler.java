@@ -1,6 +1,6 @@
 package cygni.users.components;
 
-import cygni.core.eventsourcing.EventStore;
+import cygni.es.EventStore;
 import cygni.users.aggregates.UserAggregate;
 import cygni.users.dtos.UserViewDTO;
 import io.smallrye.mutiny.Uni;

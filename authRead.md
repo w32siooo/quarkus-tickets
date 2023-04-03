@@ -59,7 +59,7 @@ You should be able to access your Keycloak Server at https://localhost:8543.
 Log in as the `admin` user to access the Keycloak Administration Console.
 Username should be `admin` and password `admin`.
 
-Import the [realm configuration file](config/quarkus-realm.json) to create a new realm.
+Import the [realm configuration file](config/realm.json) to create a new realm.
 For more details, see the Keycloak documentation about how to [create a new realm](https://www.keycloak.org/docs/latest/server_admin/index.html#_create-realm).
 
 ### Live coding with Quarkus
