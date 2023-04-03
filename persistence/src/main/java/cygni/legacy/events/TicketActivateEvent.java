@@ -1,12 +1,11 @@
 package cygni.legacy.events;
 
 import cygni.legacy.EventType;
-import lombok.Getter;
-import lombok.Setter;
-
+import java.util.UUID;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-import java.util.UUID;
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Setter

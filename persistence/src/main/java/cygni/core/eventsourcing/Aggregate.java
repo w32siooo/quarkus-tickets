@@ -1,4 +1,4 @@
-package cygni.es;
+package cygni.core.eventsourcing;
 
 import java.util.UUID;
 

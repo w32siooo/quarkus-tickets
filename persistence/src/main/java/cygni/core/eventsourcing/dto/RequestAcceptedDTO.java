@@ -1,4 +1,4 @@
-package cygni.es.dto;
+package cygni.core.eventsourcing.dto;
 
 import java.util.UUID;
 

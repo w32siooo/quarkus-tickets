@@ -1,7 +1,6 @@
-package cygni.es;
+package cygni.core.eventsourcing;
 
 import io.smallrye.mutiny.Uni;
-
 import java.util.List;
 import java.util.UUID;
 

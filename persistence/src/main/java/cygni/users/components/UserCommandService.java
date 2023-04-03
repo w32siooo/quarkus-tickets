@@ -1,11 +1,10 @@
 package cygni.users.components;
 
-import cygni.es.dto.RequestAcceptedDTO;
+import cygni.core.eventsourcing.dto.RequestAcceptedDTO;
 import cygni.users.dtos.BuyTicketDTO;
 import cygni.users.dtos.CreateNewUserDTO;
 import cygni.users.dtos.RemoveTicketDTO;
 import io.smallrye.mutiny.Uni;
-
 import java.util.UUID;
 
 public interface UserCommandService {

@@ -85,22 +85,22 @@ smallrye:
     mp-compatibility: 'true'
 
 '%test':
-    quarkus:
-      opentelemetry:
-        tracer:
-          enabled: false
-      datasource:
-        db-kind: postgresql
-        username: postgres
-        password: postgres
-        reactive:
-          url: vertx-reactive:postgresql://localhost:5433/microservices
-        devservices:
-          enabled: true
-          port: 5433
-          db-name: microservices
-      kafka:
-        devservices:
-          enabled: true
-          port: 9093
-          service-name: shared-kafka
+  quarkus:
+    opentelemetry:
+      tracer:
+        enabled: false
+    datasource:
+      db-kind: postgresql
+      username: postgres
+      password: postgres
+      reactive:
+        url: vertx-reactive:postgresql://localhost:5433/microservices
+      devservices:
+        enabled: true
+        port: 5433
+        db-name: microservices
+    kafka:
+      devservices:
+        enabled: true
+        port: 9093
+        service-name: shared-kafka

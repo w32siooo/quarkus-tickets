@@ -1,4 +1,4 @@
-package cygni.es.exceptions;
+package cygni.core.eventsourcing.exceptions;
 
 public class InvalidEventTypeException extends RuntimeException {
     public InvalidEventTypeException() {
