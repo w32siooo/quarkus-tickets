@@ -61,6 +61,7 @@ quarkus:
     keycloak:
       policy-enforcer:
         enable: true
+        lazy-load-paths: false
 mp:
   messaging:
     outgoing:

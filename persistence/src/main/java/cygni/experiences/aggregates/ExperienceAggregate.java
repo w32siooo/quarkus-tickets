@@ -1,5 +1,6 @@
 package cygni.experiences.aggregates;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import cygni.es.AggregateRoot;
 import cygni.es.Event;
 import cygni.es.SerializerUtils;
@@ -34,6 +35,7 @@ public class ExperienceAggregate extends AggregateRoot {
 
   private int availableSeats;
 
+  @JsonAlias({"bookedSeats", "soldSeats"})
   private int soldSeats;
 
   private boolean cancelled = false;
