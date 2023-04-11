@@ -129,6 +129,8 @@ public class ExperienceAggregate extends AggregateRoot {
     this.date = event.getDate();
     this.price = event.getPrice();
     this.totalSeats = event.getSeats();
+    this.availableSeats = event.getSeats();
+    this.soldSeats = 0;
   }
 
   private void handle(ExperienceTotalSeatsChangedEvent event) {

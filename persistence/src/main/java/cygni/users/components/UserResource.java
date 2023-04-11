@@ -1,5 +1,6 @@
 package cygni.users.components;
 
+import cygni.users.commands.BuyTicketCommand;
 import cygni.users.dtos.BuyTicketDTO;
 import cygni.users.commands.CreateNewUserCommand;
 import cygni.users.dtos.RemoveTicketDTO;
@@ -37,11 +38,11 @@ public class UserResource {
   }
 
   @POST
-  @Path("{userId}/experiences/{experienceId}/add")
-  public Uni<Response> addExperience(
+  @Path("{userId}/buyExperience")
+  public Uni<Response> buyExperience(
       @NotNull @PathParam("userId") UUID userId,
-      @NotNull @PathParam("experienceId") UUID experienceId) {
-    BuyTicketDTO dto = new BuyTicketDTO(experienceId, 1, 1L);
+      @NotNull @Valid BuyTicketCommand cmd) {
+    BuyTicketDTO dto = new BuyTicketDTO(cmd.experienceID(), cmd.seats());
     return commandService.handle(userId, dto).map(s -> Response.status(201).entity(s).build());
   }
 
