@@ -2,7 +2,8 @@ package cygni.experiences.resources;
 
 import static io.restassured.RestAssured.given;
 
-import cygni.es.EventStore;import cygni.experiences.aggregates.ExperienceAggregate;
+import cygni.es.EventStore;
+import cygni.experiences.aggregates.ExperienceAggregate;
 import cygni.experiences.dtos.CancelExperienceDTO;
 import cygni.experiences.dtos.ChangeExperienceSeatsDTO;
 import cygni.experiences.dtos.CreateExperienceRequestDTO;
@@ -14,6 +15,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.hibernate.reactive.mutiny.Mutiny;
 import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import javax.inject.Inject;
 
@@ -28,7 +30,7 @@ public class ExperienceResourceTest {
 
   @Inject Mutiny.SessionFactory sf;
 
-  @Before
+  @BeforeEach
   public void init() {
     sf.withTransaction((session, tx) -> session.createNativeQuery("delete from events where aggregate_type = 'Experience'")
                     .executeUpdate())
