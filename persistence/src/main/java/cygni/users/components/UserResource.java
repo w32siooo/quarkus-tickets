@@ -43,7 +43,9 @@ public class UserResource {
       @NotNull @PathParam("userId") UUID userId,
       @NotNull @Valid BuyTicketCommand cmd) {
     BuyTicketDTO dto = new BuyTicketDTO(cmd.experienceID(), cmd.seats());
-    return commandService.handle(userId, dto).map(s -> Response.status(201).entity(s).build());
+    return commandService.handle(userId, dto)
+            .onItem().ifNotNull().transform(s -> Response.status(201).entity(s).build())
+            .onFailure().recoverWithItem(Response.status(400).build());
   }
 
   @POST

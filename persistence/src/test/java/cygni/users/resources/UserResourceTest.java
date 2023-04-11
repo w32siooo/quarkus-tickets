@@ -5,26 +5,26 @@ import cygni.experiences.dtos.CreateExperienceRequestDTO;
 import cygni.experiences.dtos.ExperienceCreatedDTO;
 import cygni.users.commands.BuyTicketCommand;
 import cygni.users.commands.CreateNewUserCommand;
-import cygni.users.components.UserResource;
-import cygni.users.dtos.BuyTicketDTO;
-import io.quarkus.test.common.http.TestHTTPEndpoint;
+
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.keycloak.client.KeycloakTestClient;
 import io.restassured.http.ContentType;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.jupiter.api.BeforeAll;
+import org.hibernate.reactive.mutiny.Mutiny;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import java.util.UUID;
+import javax.inject.Inject;import java.util.UUID;
 import static io.restassured.RestAssured.given;
 
 @QuarkusTest
 public class UserResourceTest {
   static KeycloakTestClient keycloakClient = new KeycloakTestClient();
-  static ExperienceCreatedDTO experienceCreatedDTO;
+  static ExperienceCreatedDTO experienceCreatedDTO; //shared
 
-  static UUID aliceUserId;
+  static UUID aliceUserId; //shared
+
+  @Inject Mutiny.SessionFactory sf;
+
 
   private static String getAccessToken(String userName) {
     return keycloakClient.getAccessToken(userName);
@@ -32,6 +32,12 @@ public class UserResourceTest {
 
   @BeforeEach
   void setup() {
+    sf.withTransaction((session, tx) -> session.createNativeQuery("delete from events where aggregate_type = 'User'")
+                    .executeUpdate())
+            .await().indefinitely();
+    sf.withTransaction((session, tx) -> session.createNativeQuery("delete from events where aggregate_type = 'Experience'")
+                    .executeUpdate())
+            .await().indefinitely();
     experienceCreatedDTO =
         given()
             .auth()
@@ -65,7 +71,6 @@ public class UserResourceTest {
 
   @Test
   void testBuyExperience() {
-
     BuyTicketCommand buyCmd =
         new BuyTicketCommand(UUID.fromString(experienceCreatedDTO.aggregateID()), 1);
     given()
@@ -77,5 +82,19 @@ public class UserResourceTest {
         .post(String.format("/api/v1/users/%s/buyExperience", aliceUserId))
         .then()
         .statusCode(201);
+  }
+  @Test
+  void testBuyExperienceFail() {
+    BuyTicketCommand buyCmd =
+            new BuyTicketCommand(UUID.fromString(experienceCreatedDTO.aggregateID()), 6);
+    given()
+            .auth()
+            .oauth2(getAccessToken("alice"))
+            .when()
+            .contentType(ContentType.JSON)
+            .body(buyCmd)
+            .post(String.format("/api/v1/users/%s/buyExperience", aliceUserId))
+            .then()
+            .statusCode(400);
   }
 }
