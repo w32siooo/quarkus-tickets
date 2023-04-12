@@ -10,14 +10,8 @@ import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
 
 @Entity
-@Getter
-@Builder
-@AllArgsConstructor
 @Table(name = "snapshots", uniqueConstraints = @UniqueConstraint(columnNames = {"aggregate_id"}))
 public class SnapshotEntity {
   @Id @GeneratedValue private UUID id;
@@ -44,4 +38,42 @@ public class SnapshotEntity {
   private OffsetDateTime timestamp;
 
   public SnapshotEntity() {}
+
+  public SnapshotEntity(UUID id, UUID aggregateId, String aggregateType, byte[] data, byte[] metadata, Long version, OffsetDateTime timestamp) {
+    this.id = id;
+    this.aggregateId = aggregateId;
+    this.aggregateType = aggregateType;
+    this.data = data;
+    this.metadata = metadata;
+    this.version = version;
+    this.timestamp = timestamp;
+  }
+
+  public UUID getId() {
+    return id;
+  }
+
+  public UUID getAggregateId() {
+    return aggregateId;
+  }
+
+  public String getAggregateType() {
+    return aggregateType;
+  }
+
+  public byte[] getData() {
+    return data;
+  }
+
+  public byte[] getMetadata() {
+    return metadata;
+  }
+
+  public Long getVersion() {
+    return version;
+  }
+
+  public OffsetDateTime getTimestamp() {
+    return timestamp;
+  }
 }

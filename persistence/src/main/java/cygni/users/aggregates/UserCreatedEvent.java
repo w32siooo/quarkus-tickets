@@ -2,9 +2,7 @@ package cygni.users.aggregates;
 
 import cygni.es.BaseEvent;
 import java.util.UUID;
-import lombok.Getter;
 
-@Getter
 public class UserCreatedEvent extends BaseEvent {
   public static final String USER_CREATED = "UserCreated";
   private final String name;

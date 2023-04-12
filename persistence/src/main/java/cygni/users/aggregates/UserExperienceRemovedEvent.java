@@ -2,9 +2,7 @@ package cygni.users.aggregates;
 
 import cygni.es.BaseEvent;
 import java.util.UUID;
-import lombok.Getter;
 
-@Getter
 public class UserExperienceRemovedEvent extends BaseEvent {
   public static final String USER_EXPERIENCE_REMOVED = "UserExperienceRemoved";
   private final UUID experienceId;
@@ -12,5 +10,9 @@ public class UserExperienceRemovedEvent extends BaseEvent {
   public UserExperienceRemovedEvent(UUID aggregateId, UUID experienceId) {
     super(aggregateId);
     this.experienceId = experienceId;
+  }
+
+  public UUID getExperienceId() {
+    return experienceId;
   }
 }

@@ -8,11 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
+
 public abstract class AggregateRoot implements Aggregate {
 
   protected final List<Event> changes = new ArrayList<>();
@@ -23,6 +20,9 @@ public abstract class AggregateRoot implements Aggregate {
   public AggregateRoot(final UUID id, final String aggregateType) {
     this.id = id;
     this.type = aggregateType;
+  }
+
+  public AggregateRoot() {
   }
 
   public abstract void when(final Event event);
@@ -76,15 +76,14 @@ public abstract class AggregateRoot implements Aggregate {
   }
 
   protected Event createEvent(String eventType, byte[] data, byte[] metadata) {
-    return Event.builder()
-        .aggregateId(this.getId())
-        .version(this.getVersion())
-        .aggregateType(this.getType())
-        .type(eventType)
-        .data(Objects.isNull(data) ? new byte[] {} : data)
-        .metadata(Objects.isNull(metadata) ? new byte[] {} : metadata)
-        .timestamp(OffsetDateTime.now())
-        .build();
+    Event event = new Event();
+    event.setAggregateId(this.getId());
+    event.setAggregateType(this.getType());
+    event.setType(eventType);
+    event.setData(Objects.isNull(data) ? new byte[] {} : data);
+    event.setMetadata(Objects.isNull(metadata) ? new byte[] {} : metadata);
+    event.setTimestamp(OffsetDateTime.now());
+    return event;
   }
 
   @Override
@@ -98,5 +97,23 @@ public abstract class AggregateRoot implements Aggregate {
                     changes=%s
                 }""",
         id, type, version, changes.size());
+  }
+
+  public List<Event> getChanges() {
+    return changes;
+  }
+
+  @Override
+  public UUID getId() {
+    return id;
+  }
+
+  @Override
+  public String getType() {
+    return type;
+  }
+
+  public long getVersion() {
+    return version;
   }
 }

@@ -4,8 +4,8 @@ import cygni.es.EventStore;
 import cygni.es.dto.RequestAcceptedDTO;
 import cygni.experiences.aggregates.ExperienceAggregate;
 import cygni.users.aggregates.UserAggregate;
-import cygni.users.dtos.BuyTicketDTO;
 import cygni.users.commands.CreateNewUserCommand;
+import cygni.users.dtos.BuyTicketDTO;
 import cygni.users.dtos.RemoveTicketDTO;
 import io.smallrye.mutiny.Uni;
 import java.util.UUID;
@@ -31,7 +31,7 @@ public class UserCommandHandler implements UserCommandService {
   public Uni<RequestAcceptedDTO> handle(UUID aggregateId, BuyTicketDTO buyTicketDTO) {
 
     return eventStore
-        .load(buyTicketDTO.experienceId(), ExperienceAggregate.class)
+        .load(buyTicketDTO.experienceId(), ExperienceAggregate.class) //first load the experience to get the id
         .onItem()
         .transformToUni(
             expAgg -> {
@@ -42,23 +42,23 @@ public class UserCommandHandler implements UserCommandService {
                       .transform(
                           aggregate -> {
                             aggregate.buyExperience(
-                                buyTicketDTO.experienceId(),
+                                expAgg.getId(),
                                 buyTicketDTO.seats(),
                                 (long) expAgg.getPrice());
-                            return aggregate;
+                              expAgg.bookExperience(aggregateId, buyTicketDTO.seats());
+
+                              return aggregate;
                           });
               return Uni.combine().all().unis(Uni.createFrom().item(expAgg), userAgg).asTuple();
             })
         .onItem()
-        .transform(
+        .transformToUni(
             tuple -> {
               ExperienceAggregate expAgg = tuple.getItem1();
               UserAggregate userAgg = tuple.getItem2();
-              expAgg.bookExperience(aggregateId, buyTicketDTO.seats());
-              return Uni.combine()
-                  .all()
-                  .unis(eventStore.persistAndPublish(expAgg), eventStore.persistAndPublish(userAgg))
-                  .asTuple();
+              return Uni.join()
+                  .all(eventStore.persistAndPublish(expAgg), eventStore.persistAndPublish(userAgg))
+                  .andCollectFailures();
             })
         .onItem()
         .transform(tuple -> new RequestAcceptedDTO("ticket bought", aggregateId));

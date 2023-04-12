@@ -15,27 +15,29 @@ import java.util.UUID;
 public class EventSourcingMappers {
   private EventSourcingMappers() {}
 
+
+
   public static <T extends AggregateRoot> Snapshot snapshotFromAggregate(final T aggregate) {
     byte[] bytes = SerializerUtils.serializeToJsonBytes(aggregate);
-    return Snapshot.builder()
-        .id(UUID.randomUUID())
-        .aggregateId(aggregate.getId())
-        .aggregateType(aggregate.getType())
-        .version(aggregate.getVersion())
-        .data(bytes)
-        .timestamp(OffsetDateTime.now())
-        .build();
+    return new Snapshot(
+        UUID.randomUUID(),
+        aggregate.getId(),
+        aggregate.getType(),
+        bytes,
+        null,
+        aggregate.getVersion(),
+        OffsetDateTime.now());
   }
 
   public static Snapshot snapshotFromEntity(final SnapshotEntity entity) {
-    return Snapshot.builder()
-        .id(entity.getId())
-        .aggregateId(entity.getAggregateId())
-        .aggregateType(entity.getAggregateType())
-        .version(entity.getVersion())
-        .data(entity.getData())
-        .timestamp(entity.getTimestamp())
-        .build();
+    return new Snapshot(
+        entity.getId(),
+        entity.getAggregateId(),
+        entity.getAggregateType(),
+        entity.getData(),
+        entity.getMetadata(),
+        entity.getVersion(),
+        entity.getTimestamp());
   }
 
   public static Uni<List<Event>> eventsFromEntities(final List<EventEntity> entities) {
@@ -47,16 +49,15 @@ public class EventSourcingMappers {
   }
 
   public static Event eventFromEntity(final EventEntity entity) {
-    return Event.builder()
-        .id(entity.getId())
-        .aggregateId(entity.getAggregateId())
-        .aggregateType(entity.getAggregateType())
-        .type(entity.getEventType())
-        .data(entity.getData())
-        .metadata(entity.getMetadata())
-        .version(entity.getVersion())
-        .timestamp(entity.getTimestamp())
-        .build();
+    return new Event(
+        entity.getId(),
+        entity.getAggregateId(),
+        entity.getAggregateType(),
+        entity.getEventType(),
+        entity.getData(),
+        entity.getMetadata(),
+        entity.getVersion(),
+        entity.getTimestamp());
   }
 
   public static <T extends AggregateRoot> T aggregateFromSnapshot(

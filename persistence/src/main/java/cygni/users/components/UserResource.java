@@ -1,8 +1,9 @@
 package cygni.users.components;
 
+import cygni.es.dto.RequestFailedDTO;
 import cygni.users.commands.BuyTicketCommand;
-import cygni.users.dtos.BuyTicketDTO;
 import cygni.users.commands.CreateNewUserCommand;
+import cygni.users.dtos.BuyTicketDTO;
 import cygni.users.dtos.RemoveTicketDTO;
 import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
@@ -45,7 +46,7 @@ public class UserResource {
     BuyTicketDTO dto = new BuyTicketDTO(cmd.experienceID(), cmd.seats());
     return commandService.handle(userId, dto)
             .onItem().ifNotNull().transform(s -> Response.status(201).entity(s).build())
-            .onFailure().recoverWithItem(Response.status(400).build());
+            .onFailure().recoverWithUni(s -> Uni.createFrom().item(Response.status(400).entity(new RequestFailedDTO(s.getMessage())).build()));
   }
 
   @POST

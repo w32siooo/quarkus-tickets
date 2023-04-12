@@ -3,9 +3,7 @@ package cygni.experiences.events;
 import cygni.es.BaseEvent;
 import cygni.experiences.aggregates.ExperienceAggregate;
 import java.util.UUID;
-import lombok.Getter;
 
-@Getter
 public class ExperienceTotalSeatsChangedEvent extends BaseEvent {
 
   public static final String EXPERIENCE_TOTAL_SEATS_CHANGED = "ExperienceTotalSeatsChanged";
@@ -17,5 +15,9 @@ public class ExperienceTotalSeatsChangedEvent extends BaseEvent {
   public ExperienceTotalSeatsChangedEvent(UUID aggregateId, int newSeats) {
     super(aggregateId);
     this.newSeats = newSeats;
+  }
+
+  public int getNewSeats() {
+    return newSeats;
   }
 }

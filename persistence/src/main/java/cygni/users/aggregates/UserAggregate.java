@@ -4,35 +4,40 @@ import cygni.es.AggregateRoot;
 import cygni.es.Event;
 import cygni.es.SerializerUtils;
 import cygni.users.dtos.UserViewDTO;
+import org.slf4j.Logger;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 
-@EqualsAndHashCode(callSuper = false)
-@NoArgsConstructor
-@AllArgsConstructor
-@Data
 public class UserAggregate extends AggregateRoot {
+
+  private static final Logger log = org.slf4j.LoggerFactory.getLogger(UserAggregate.class);
   public static final String AGGREGATE_TYPE = "User";
 
   private String name;
 
   private long balance;
 
-  private List<UUID> ownedExperiences;
+  private final List<UUID> ownedExperiences;
 
   public UserAggregate(UUID id) {
     super(id, AGGREGATE_TYPE);
     ownedExperiences = new ArrayList<>();
   }
 
+  public UserAggregate(String name, long balance, List<UUID> ownedExperiences) {
+    this.name = name;
+    this.balance = balance;
+    this.ownedExperiences = ownedExperiences;
+  }
+
+
   public void buyExperience(UUID experienceId, int seats, Long price) {
-    if (balance < price) {
-      throw new RuntimeException("Not enough balance to book experience ticket");
+    if (balance < price * seats) {
+      throw new RuntimeException("Not enough balance to book the wanted tickets");
+    }else{
+      log.info("Buying with balance {} for {} seats", balance, seats);
     }
     final var data = new BuyExperienceEvent(id, experienceId, seats, price);
     final var dataB = SerializerUtils.serializeToJsonBytes(data);
@@ -87,6 +92,9 @@ public class UserAggregate extends AggregateRoot {
   }
 
   private void handle(BuyExperienceEvent event) {
+    if (event.getPrice() != null) {
+      this.balance = this.balance - event.getPrice() * (long) event.getSeats();
+    }
     this.ownedExperiences.add(event.getExperienceId());
   }
 
@@ -96,5 +104,17 @@ public class UserAggregate extends AggregateRoot {
 
   public UserViewDTO toDTO() {
     return new UserViewDTO(name, balance, id, ownedExperiences);
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public long getBalance() {
+    return balance;
+  }
+
+  public List<UUID> getOwnedExperiences() {
+    return ownedExperiences;
   }
 }

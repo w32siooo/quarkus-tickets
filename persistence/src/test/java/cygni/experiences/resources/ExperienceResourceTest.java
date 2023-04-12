@@ -2,7 +2,6 @@ package cygni.experiences.resources;
 
 import static io.restassured.RestAssured.given;
 
-import cygni.es.EventStore;
 import cygni.experiences.aggregates.ExperienceAggregate;
 import cygni.experiences.dtos.CancelExperienceDTO;
 import cygni.experiences.dtos.ChangeExperienceSeatsDTO;
@@ -13,11 +12,10 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.keycloak.client.KeycloakTestClient;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import javax.inject.Inject;
 import org.hibernate.reactive.mutiny.Mutiny;
-import org.junit.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import javax.inject.Inject;
 
 @QuarkusTest
 @TestHTTPEndpoint(ExperienceResource.class)

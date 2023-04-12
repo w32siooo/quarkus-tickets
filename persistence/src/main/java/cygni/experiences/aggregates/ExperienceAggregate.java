@@ -12,20 +12,14 @@ import cygni.experiences.events.ExperienceTotalSeatsChangedEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@EqualsAndHashCode(callSuper = false)
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Slf4j
 public class ExperienceAggregate extends AggregateRoot {
 
   public static final String AGGREGATE_TYPE = "Experience";
+
+  private static final Logger log = LoggerFactory.getLogger(ExperienceAggregate.class);
 
   private String artist;
   private String venue;
@@ -45,6 +39,18 @@ public class ExperienceAggregate extends AggregateRoot {
   public ExperienceAggregate(UUID id) {
     super(id, AGGREGATE_TYPE);
     notes = new ArrayList<>();
+  }
+
+  public ExperienceAggregate(String artist, String venue, String date, int price, int totalSeats, int availableSeats, int soldSeats, boolean cancelled, List<String> notes) {
+    this.artist = artist;
+    this.venue = venue;
+    this.date = date;
+    this.price = price;
+    this.totalSeats = totalSeats;
+    this.availableSeats = availableSeats;
+    this.soldSeats = soldSeats;
+    this.cancelled = cancelled;
+    this.notes = notes;
   }
 
   public void createExperience(String artist, String venue, String date, int price, int seats) {
@@ -96,6 +102,7 @@ public class ExperienceAggregate extends AggregateRoot {
         this.soldSeats += experienceBookedEvent.getSeats();
         this.availableSeats = this.totalSeats - this.soldSeats;
         notes.add("Booked by " + experienceBookedEvent.getUserId());
+
       }
       case ExperienceCancelledEvent.EXPERIENCE_CANCELLED -> {
         this.cancelled = true;
@@ -136,5 +143,41 @@ public class ExperienceAggregate extends AggregateRoot {
   private void handle(ExperienceTotalSeatsChangedEvent event) {
     this.totalSeats = event.getNewSeats();
     this.availableSeats = this.totalSeats - this.soldSeats;
+  }
+
+  public String getArtist() {
+    return artist;
+  }
+
+  public String getVenue() {
+    return venue;
+  }
+
+  public String getDate() {
+    return date;
+  }
+
+  public int getPrice() {
+    return price;
+  }
+
+  public int getTotalSeats() {
+    return totalSeats;
+  }
+
+  public int getAvailableSeats() {
+    return availableSeats;
+  }
+
+  public int getSoldSeats() {
+    return soldSeats;
+  }
+
+  public boolean isCancelled() {
+    return cancelled;
+  }
+
+  public List<String> getNotes() {
+    return notes;
   }
 }

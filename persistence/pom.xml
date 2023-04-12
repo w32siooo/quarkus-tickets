@@ -91,12 +91,7 @@
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-hibernate-reactive</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>RELEASE</version>
-            <scope>compile</scope>
-        </dependency>
+
         <!-- Reactive SQL client for PostgreSQL -->
         <dependency>
             <groupId>io.quarkus</groupId>
@@ -147,13 +142,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${compiler-plugin.version}</version>
                 <configuration>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                            <version>RELEASE</version>
-                        </path>
-                    </annotationProcessorPaths>
+
                     <compilerArgs>
                         <arg>-parameters</arg>
                     </compilerArgs>

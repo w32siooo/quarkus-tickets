@@ -1,8 +1,6 @@
 package cygni.es;
 
-import lombok.experimental.UtilityClass;
 
-@UtilityClass
 public final class Constants {
 
   public static final String AGGREGATE_ID = "aggregate_id";
@@ -15,4 +13,8 @@ public final class Constants {
   public static final String METADATA = "metadata";
   public static final String TIMESTAMP = "timestamp";
   public static final String EVENTS = "events";
+
+  private Constants() {
+    throw new IllegalStateException("Utility class");
+  }
 }

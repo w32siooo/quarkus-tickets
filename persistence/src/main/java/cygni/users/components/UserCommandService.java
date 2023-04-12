@@ -1,8 +1,8 @@
 package cygni.users.components;
 
 import cygni.es.dto.RequestAcceptedDTO;
-import cygni.users.dtos.BuyTicketDTO;
 import cygni.users.commands.CreateNewUserCommand;
+import cygni.users.dtos.BuyTicketDTO;
 import cygni.users.dtos.RemoveTicketDTO;
 import io.smallrye.mutiny.Uni;
 import java.util.UUID;

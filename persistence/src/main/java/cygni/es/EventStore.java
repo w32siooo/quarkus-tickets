@@ -14,12 +14,13 @@ import java.util.Objects;
 import java.util.UUID;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
 import org.hibernate.reactive.mutiny.Mutiny;
+import org.slf4j.Logger;
 
 @ApplicationScoped
-@Slf4j
 public class EventStore implements EventStoreDB {
+
+  private final Logger log = org.slf4j.LoggerFactory.getLogger(EventStore.class);
 
   private static final String LOAD_EVENTS_QUERY =
       "select * from events e where e.aggregate_id = ?1 and e.version > ?2 ORDER BY e.version ASC";
@@ -181,16 +182,16 @@ public class EventStore implements EventStoreDB {
   private <T extends AggregateRoot> Uni<Void> persistSnapshot(Mutiny.Session session, T aggregate) {
     aggregate.toSnapshot();
     final var snapshot = EventSourcingMappers.snapshotFromAggregate(aggregate);
-    SnapshotEntity snapshotEntity =
-        SnapshotEntity.builder()
-            .aggregateId(snapshot.getAggregateId())
-            .aggregateType(snapshot.getAggregateType())
-            .data(snapshot.getData())
-            .metadata(snapshot.getMetaData())
-            .version(snapshot.getVersion())
-            .timestamp(OffsetDateTime.now())
-            .id(UUID.randomUUID())
-            .build();
+
+
+    SnapshotEntity snapshotEntity = new SnapshotEntity(
+            UUID.randomUUID(),
+            snapshot.getAggregateId(),
+        snapshot.getAggregateType(),
+        snapshot.getData(),
+        snapshot.getMetaData(),
+        snapshot.getVersion(),
+        OffsetDateTime.now());
     return session
         .createNativeQuery(SAVE_SNAPSHOT_QUERY)
         .setParameter(1, snapshotEntity.getAggregateId())
@@ -210,15 +211,14 @@ public class EventStore implements EventStoreDB {
         .iterable(events)
         .map(
             event ->
-                EventEntity.builder()
-                    .aggregateId(event.getAggregateId())
-                    .aggregateType(event.getAggregateType())
-                    .eventType(event.getType())
-                    .data(event.getData())
-                    .metadata(event.getMetadata())
-                    .version(event.getVersion())
-                    .timestamp(OffsetDateTime.now())
-                    .build())
+                    new EventEntity(
+                        event.getAggregateId(),
+                        event.getAggregateType(),
+                        event.getType(),
+                        event.getData(),
+                        event.getMetadata(),
+                        event.getVersion(),
+                        OffsetDateTime.now()))
         .collect()
         .asList()
         .chain(e -> session.persistAll(e.toArray()))

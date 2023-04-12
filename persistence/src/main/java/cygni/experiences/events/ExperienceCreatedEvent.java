@@ -3,9 +3,7 @@ package cygni.experiences.events;
 import cygni.es.BaseEvent;
 import cygni.experiences.aggregates.ExperienceAggregate;
 import java.util.UUID;
-import lombok.Getter;
 
-@Getter
 public class ExperienceCreatedEvent extends BaseEvent {
   public static final String EXPERIENCE_CREATED = "ExperienceCreated";
   public static final String AGGREGATE_TYPE = ExperienceAggregate.AGGREGATE_TYPE;
@@ -24,5 +22,25 @@ public class ExperienceCreatedEvent extends BaseEvent {
     this.date = date;
     this.price = price;
     this.seats = seats;
+  }
+
+  public String getArtist() {
+    return artist;
+  }
+
+  public String getVenue() {
+    return venue;
+  }
+
+  public String getDate() {
+    return date;
+  }
+
+  public int getPrice() {
+    return price;
+  }
+
+  public int getSeats() {
+    return seats;
   }
 }

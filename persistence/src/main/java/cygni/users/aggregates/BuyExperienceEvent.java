@@ -2,9 +2,7 @@ package cygni.users.aggregates;
 
 import cygni.es.BaseEvent;
 import java.util.UUID;
-import lombok.Getter;
 
-@Getter
 public class BuyExperienceEvent extends BaseEvent {
   public static final String BUY_EXPERIENCE_EVENT = "BuyExperienceEvent";
   private final UUID experienceId;
@@ -18,5 +16,17 @@ public class BuyExperienceEvent extends BaseEvent {
     this.experienceId = experienceId;
     this.seats = seats;
     this.price = price;
+  }
+
+  public UUID getExperienceId() {
+    return experienceId;
+  }
+
+  public Long getPrice() {
+    return price;
+  }
+
+  public int getSeats() {
+    return seats;
   }
 }
