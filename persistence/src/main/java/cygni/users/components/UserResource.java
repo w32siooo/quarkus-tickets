@@ -1,7 +1,6 @@
 package cygni.users.components;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import cygni.es.dto.RequestFailedDTO;
 import cygni.es.mappers.EventSourcingMappers;
 import cygni.users.commands.BuyTicketCommand;
@@ -49,12 +48,12 @@ public class UserResource {
   }
 
   @POST
-  @Path("{userId}/buyExperience")
-  public Uni<Response> buyExperience(
-      @NotNull @PathParam("userId") UUID userId, @NotNull @Valid BuyTicketCommand cmd) {
+  @Path("/buyExperience")
+  public Uni<Response> buyExperience(@NotNull @Valid BuyTicketCommand cmd, @Context SecurityContext ctx) {
     BuyTicketDTO dto = new BuyTicketDTO(cmd.experienceID(), cmd.seats());
+    log.error(EventSourcingMappers.uuidFromSecurityContext(ctx).toString());
     return commandService
-        .handle(userId, dto)
+        .handle(EventSourcingMappers.uuidFromSecurityContext(ctx), dto)
         .onItem()
         .ifNotNull()
         .transform(s -> Response.status(201).entity(s).build())
@@ -67,24 +66,24 @@ public class UserResource {
   }
 
   @POST
-  @Path("{userId}/experiences/{experienceId}/remove")
+  @Path("experiences/{experienceId}/remove")
   public Uni<Response> removeExperience(
-      @NotNull @PathParam("userId") UUID userId,
+      @Context SecurityContext ctx,
       @NotNull @PathParam("experienceId") UUID experienceId) {
     var dto = new RemoveTicketDTO(experienceId);
-    return commandService.handle(userId, dto).map(s -> Response.status(201).entity(s).build());
+    return commandService.handle(EventSourcingMappers.uuidFromSecurityContext(ctx), dto).map(s -> Response.status(201).entity(s).build());
   }
 
   @POST
-  @Path("{userId}/deposit/{toAdd}")
+  @Path("deposit/{toAdd}")
   public Uni<Response> depositBalance(
-      @NotNull @PathParam("userId") UUID userId, @NotNull @PathParam("toAdd") Long toAdd) {
-    return commandService.handle(userId, toAdd).map(s -> Response.status(201).entity(s).build());
+          @Context SecurityContext ctx, @NotNull @PathParam("toAdd") Long toAdd) {
+    return commandService.handle(EventSourcingMappers.uuidFromSecurityContext(ctx), toAdd).map(s -> Response.status(201).entity(s).build());
   }
 
   @GET
-  @Path("{userId}")
-  public Uni<Response> getUser(@NotNull @PathParam("userId") UUID userId) {
-    return queryService.handle(userId).map(s -> Response.status(200).entity(s).build());
+  @Path("")
+  public Uni<Response> getUser(@Context SecurityContext ctx) {
+    return queryService.handle(EventSourcingMappers.uuidFromSecurityContext(ctx)).map(s -> Response.status(200).entity(s).build());
   }
 }
