@@ -44,6 +44,7 @@ public class UserResource {
     var cmd =
         new CreateNewUserCommand(
             ctx.getUserPrincipal().getName(), 999L, EventSourcingMappers.uuidFromSecurityContext(ctx));
+    log.info("Received command: {}", cmd);
     return commandService.handle(cmd).map(s -> Response.status(201).entity(s).build());
   }
 
@@ -51,6 +52,8 @@ public class UserResource {
   @Path("/buyExperience")
   public Uni<Response> buyExperience(@NotNull @Valid BuyTicketCommand cmd, @Context SecurityContext ctx) {
     BuyTicketDTO dto = new BuyTicketDTO(cmd.experienceID(), cmd.seats());
+    log.info("Received command: {}", cmd);
+
     return commandService
         .handle(EventSourcingMappers.uuidFromSecurityContext(ctx), dto)
         .onItem()
@@ -69,6 +72,7 @@ public class UserResource {
   public Uni<Response> removeExperience(
       @Context SecurityContext ctx,
       @NotNull @PathParam("experienceId") UUID experienceId) {
+
     var dto = new RemoveTicketDTO(experienceId);
     return commandService.handle(EventSourcingMappers.uuidFromSecurityContext(ctx), dto).map(s -> Response.status(201).entity(s).build());
   }
