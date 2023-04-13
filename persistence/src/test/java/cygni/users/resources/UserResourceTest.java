@@ -60,21 +60,17 @@ public class UserResourceTest {
             .extract()
             .body()
             .as(ExperienceCreatedDTO.class);
-
-    aliceUserId =
-        given()
+    given()
             .auth()
             .oauth2(getAccessToken("alice"))
             .when()
             .contentType(ContentType.JSON)
             .post("/api/v1/users/create")
             .then()
-            .statusCode(201)
-            .extract()
-            .body()
-            .as(RequestAcceptedDTO.class)
-            .aggregateId();
+            .statusCode(201);
+
   }
+
 
   @Test
   void testBuyExperience() {
@@ -86,7 +82,7 @@ public class UserResourceTest {
         .when()
         .contentType(ContentType.JSON)
         .body(buyCmd)
-        .post(String.format("/api/v1/users/%s/buyExperience", aliceUserId))
+        .post("/api/v1/users/buyExperience")
         .then()
         .statusCode(201);
     UserViewDTO aliceObject =
@@ -94,7 +90,7 @@ public class UserResourceTest {
             .auth()
             .oauth2(getAccessToken("alice"))
             .when()
-            .get(String.format("/api/v1/users/%s", aliceUserId))
+            .get("/api/v1/users/")
             .then()
             .statusCode(200)
             .extract()
@@ -106,7 +102,7 @@ public class UserResourceTest {
             .when()
             .contentType(ContentType.JSON)
             .body(buyCmd)
-            .post(String.format("/api/v1/users/%s/buyExperience", aliceUserId))
+            .post("/api/v1/users/buyExperience" )
             .then()
             .statusCode(400)
             .extract()
@@ -127,7 +123,7 @@ public class UserResourceTest {
         .when()
         .contentType(ContentType.JSON)
         .body(buyCmd)
-        .post(String.format("/api/v1/users/%s/buyExperience", aliceUserId))
+        .post("/api/v1/users/buyExperience")
         .then()
         .statusCode(400);
   }
