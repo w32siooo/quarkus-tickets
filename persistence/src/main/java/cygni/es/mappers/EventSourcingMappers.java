@@ -8,6 +8,8 @@ import cygni.es.orm.EventEntity;
 import cygni.es.orm.SnapshotEntity;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+
+import javax.ws.rs.core.SecurityContext;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -15,7 +17,11 @@ import java.util.UUID;
 public class EventSourcingMappers {
   private EventSourcingMappers() {}
 
-
+  public static UUID uuidFromSecurityContext(SecurityContext securityContext) {
+    var ctx = securityContext.getUserPrincipal().toString();
+    var id = ctx.substring(ctx.indexOf("id='") + 4, ctx.indexOf("',"));
+    return UUID.fromString(id);
+  }
 
   public static <T extends AggregateRoot> Snapshot snapshotFromAggregate(final T aggregate) {
     byte[] bytes = SerializerUtils.serializeToJsonBytes(aggregate);

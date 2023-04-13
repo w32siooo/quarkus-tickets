@@ -53,7 +53,7 @@ public class UserResourceTest {
             .oauth2(getAccessToken("alice"))
             .when()
             .contentType(ContentType.JSON)
-            .body(new CreateExperienceRequestDTO("joeboy", "roskilde", "2021-06-01", 5, 5))
+            .body(new CreateExperienceRequestDTO("joeboy", "roskilde", "2021-06-01", 999, 5))
             .post("api/v1/tickets/")
             .then()
             .statusCode(201)
@@ -61,14 +61,12 @@ public class UserResourceTest {
             .body()
             .as(ExperienceCreatedDTO.class);
 
-    CreateNewUserCommand cmd = new CreateNewUserCommand("Alice", 5L);
     aliceUserId =
         given()
             .auth()
             .oauth2(getAccessToken("alice"))
             .when()
             .contentType(ContentType.JSON)
-            .body(cmd)
             .post("/api/v1/users/create")
             .then()
             .statusCode(201)
@@ -116,6 +114,7 @@ public class UserResourceTest {
 
     assert failed.reason().equals("Not enough balance to book the wanted tickets");
     assert aliceObject.ownedExperiences().size() == 1;
+    //hello,
   }
 
   @Test

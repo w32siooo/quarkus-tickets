@@ -19,12 +19,11 @@ public class UserCommandHandler implements UserCommandService {
 
   @Override
   public Uni<RequestAcceptedDTO> handle(CreateNewUserCommand createUserDTO) {
-    UUID id = UUID.randomUUID();
-    UserAggregate userAggregate = new UserAggregate(id);
+    UserAggregate userAggregate = new UserAggregate(createUserDTO.id());
     userAggregate.createNewUser(createUserDTO.name(), createUserDTO.balance());
     return eventStore
         .persistAndPublish(userAggregate)
-        .map(ignored -> new RequestAcceptedDTO("user created", id));
+        .map(ignored -> new RequestAcceptedDTO("user created", createUserDTO.id()));
   }
 
   @Override
