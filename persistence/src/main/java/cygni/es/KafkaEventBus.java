@@ -7,8 +7,11 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.jboss.logging.Logger;
 
 @ApplicationScoped
@@ -22,6 +25,15 @@ public class KafkaEventBus implements EventBus {
 
   @ConfigProperty(name = "mp.messaging.incoming.event-store-in.topic", defaultValue = "event-store")
   String eventStoreTopic;
+
+  @Incoming("event-store")
+  public void consume(ConsumerRecord<String, String> record) {
+    String key = record.key(); // Can be `null` if the incoming record has no key
+    String value = record.value(); // Can be `null` if the incoming record has no value
+    String topic = record.topic();
+    int partition = record.partition();
+    logger.infof("consume key: %s, value: %s, topic: %s, partition: %d", key, value, topic, partition);
+  }
 
   public Uni<Void> publish(List<Event> events) {
     final byte[] eventsBytes = SerializerUtils.serializeToJsonBytes(events.toArray(new Event[] {}));

@@ -108,7 +108,7 @@ public class UserResourceTest {
             .extract()
             .as(RequestFailedDTO.class);
 
-    assert failed.reason().equals("Not enough balance to book the wanted tickets");
+    assert failed.reason().contains("Not enough balance to book the wanted tickets");
     assert aliceObject.ownedExperiences().size() == 1;
     //hello,
   }

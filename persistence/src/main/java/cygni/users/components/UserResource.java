@@ -1,7 +1,8 @@
 package cygni.users.components;
 
-
 import cygni.es.dto.RequestFailedDTO;
+import cygni.es.exceptions.AggregateNotFoundException;
+import cygni.es.exceptions.BookingFailedException;
 import cygni.es.mappers.EventSourcingMappers;
 import cygni.users.commands.BuyTicketCommand;
 import cygni.users.commands.CreateNewUserCommand;
@@ -43,14 +44,17 @@ public class UserResource {
   public Uni<Response> createNewUser(@Context SecurityContext ctx) {
     var cmd =
         new CreateNewUserCommand(
-            ctx.getUserPrincipal().getName(), 999L, EventSourcingMappers.uuidFromSecurityContext(ctx));
+            ctx.getUserPrincipal().getName(),
+            999L,
+            EventSourcingMappers.uuidFromSecurityContext(ctx));
     log.info("Received command: {}", cmd);
     return commandService.handle(cmd).map(s -> Response.status(201).entity(s).build());
   }
 
   @POST
   @Path("/buyExperience")
-  public Uni<Response> buyExperience(@NotNull @Valid BuyTicketCommand cmd, @Context SecurityContext ctx) {
+  public Uni<Response> bookExperience(
+      @NotNull @Valid BuyTicketCommand cmd, @Context SecurityContext ctx) {
     BuyTicketDTO dto = new BuyTicketDTO(cmd.experienceID(), cmd.seats());
     log.info("Received command: {}", cmd);
 
@@ -59,34 +63,42 @@ public class UserResource {
         .onItem()
         .ifNotNull()
         .transform(s -> Response.status(201).entity(s).build())
+        .onFailure(AggregateNotFoundException.class)
+        .recoverWithItem(
+            s -> Response.status(404).entity(new RequestFailedDTO(s.getMessage())).build())
+        .onFailure(BookingFailedException.class)
+        .recoverWithItem(
+            s -> Response.status(400).entity(new RequestFailedDTO(s.getMessage())).build())
         .onFailure()
-        .recoverWithUni(
-            s ->
-                Uni.createFrom()
-                    .item(
-                        Response.status(400).entity(new RequestFailedDTO(s.getMessage())).build()));
+        .recoverWithItem(
+            s -> Response.status(500).entity(new RequestFailedDTO(s.getMessage())).build());
   }
 
   @POST
   @Path("experiences/{experienceId}/remove")
   public Uni<Response> removeExperience(
-      @Context SecurityContext ctx,
-      @NotNull @PathParam("experienceId") UUID experienceId) {
+      @Context SecurityContext ctx, @NotNull @PathParam("experienceId") UUID experienceId) {
 
     var dto = new RemoveTicketDTO(experienceId);
-    return commandService.handle(EventSourcingMappers.uuidFromSecurityContext(ctx), dto).map(s -> Response.status(201).entity(s).build());
+    return commandService
+        .handle(EventSourcingMappers.uuidFromSecurityContext(ctx), dto)
+        .map(s -> Response.status(201).entity(s).build());
   }
 
   @POST
   @Path("deposit/{toAdd}")
   public Uni<Response> depositBalance(
-          @Context SecurityContext ctx, @NotNull @PathParam("toAdd") Long toAdd) {
-    return commandService.handle(EventSourcingMappers.uuidFromSecurityContext(ctx), toAdd).map(s -> Response.status(201).entity(s).build());
+      @Context SecurityContext ctx, @NotNull @PathParam("toAdd") Long toAdd) {
+    return commandService
+        .handle(EventSourcingMappers.uuidFromSecurityContext(ctx), toAdd)
+        .map(s -> Response.status(201).entity(s).build());
   }
 
   @GET
   @Path("")
   public Uni<Response> getUser(@Context SecurityContext ctx) {
-    return queryService.handle(EventSourcingMappers.uuidFromSecurityContext(ctx)).map(s -> Response.status(200).entity(s).build());
+    return queryService
+        .handle(EventSourcingMappers.uuidFromSecurityContext(ctx))
+        .map(s -> Response.status(200).entity(s).build());
   }
 }

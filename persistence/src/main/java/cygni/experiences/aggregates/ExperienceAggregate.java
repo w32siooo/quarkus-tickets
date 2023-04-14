@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 import cygni.es.AggregateRoot;
 import cygni.es.Event;
 import cygni.es.SerializerUtils;
+import cygni.es.exceptions.BookingFailedException;
 import cygni.experiences.dtos.ExperienceAggregateViewDTO;
 import cygni.experiences.events.ExperienceBookedEvent;
 import cygni.experiences.events.ExperienceCancelledEvent;
@@ -78,8 +79,8 @@ public class ExperienceAggregate extends AggregateRoot {
   }
 
   public void bookExperience(UUID userId, int seats) {
-    if (seats > availableSeats) throw new IllegalArgumentException("Not enough seats available");
-    if (cancelled) throw new IllegalArgumentException("Experience is cancelled");
+    if (seats > availableSeats) throw new BookingFailedException("not enough seats available");
+    if (cancelled) throw new BookingFailedException("experience is cancelled");
 
     final var data = new ExperienceBookedEvent(id, userId, seats);
     final byte[] dataB = SerializerUtils.serializeToJsonBytes(data);

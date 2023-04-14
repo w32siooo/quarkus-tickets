@@ -1,5 +1,6 @@
 package cygni.es;
 
+import cygni.es.exceptions.AggregateNotFoundException;
 import cygni.es.mappers.EventSourcingMappers;
 import cygni.es.orm.EventEntity;
 import cygni.es.orm.SnapshotEntity;
@@ -67,7 +68,7 @@ public class EventStore implements EventStoreDB {
   private <T extends AggregateRoot> Uni<T> raiseAggregateEvents(T aggregate, List<Event> events) {
     Uni<T> fallBackUni =
         (aggregate.getVersion() == 0)
-            ? Uni.createFrom().failure(new IllegalAccessError("agg not found"))
+            ? Uni.createFrom().failure(new AggregateNotFoundException(aggregate.getId().toString()))
             : Uni.createFrom().item(aggregate);
     return Multi.createFrom()
         .iterable(events)
@@ -103,7 +104,7 @@ public class EventStore implements EventStoreDB {
                           + aggregateId
                           + " of type: "
                           + aggregateType.getName());
-                  throw new IllegalAccessError(aggregateId.toString());
+                  throw new AggregateNotFoundException(aggregateId.toString());
                 }));
   }
 

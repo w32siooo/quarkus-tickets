@@ -1,4 +1,4 @@
-package cygni.users.aggregates;
+package cygni.users.events;
 
 import cygni.es.BaseEvent;
 import java.util.UUID;

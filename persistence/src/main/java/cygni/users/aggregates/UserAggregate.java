@@ -3,7 +3,12 @@ package cygni.users.aggregates;
 import cygni.es.AggregateRoot;
 import cygni.es.Event;
 import cygni.es.SerializerUtils;
+import cygni.es.exceptions.BookingFailedException;
 import cygni.users.dtos.UserViewDTO;
+import cygni.users.events.BuyExperienceEvent;
+import cygni.users.events.UserBalanceAddedEvent;
+import cygni.users.events.UserCreatedEvent;
+import cygni.users.events.UserExperienceRemovedEvent;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -35,7 +40,7 @@ public class UserAggregate extends AggregateRoot {
 
   public void buyExperience(UUID experienceId, int seats, Long price) {
     if (balance < price * seats) {
-      throw new RuntimeException("Not enough balance to book the wanted tickets");
+      throw new BookingFailedException("Not enough balance to book the wanted tickets");
     }else{
       log.info("Buying with balance {} for {} seats", balance, seats);
     }
