@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 @QuarkusTest
-@Disabled
 public class UserResourceTest {
   static KeycloakTestClient keycloakClient = new KeycloakTestClient();
   static ExperienceCreatedDTO experienceCreatedDTO; // shared

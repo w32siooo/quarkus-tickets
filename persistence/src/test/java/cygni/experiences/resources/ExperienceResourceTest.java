@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test;
 
 @QuarkusTest
 @TestHTTPEndpoint(ExperienceResource.class)
-@Disabled
 public class ExperienceResourceTest {
   static {
     RestAssured.useRelaxedHTTPSValidation();

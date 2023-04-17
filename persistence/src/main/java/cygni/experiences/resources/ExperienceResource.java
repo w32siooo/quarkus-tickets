@@ -8,7 +8,6 @@ import cygni.experiences.dtos.ChangeExperienceSeatsDTO;
 import cygni.experiences.dtos.CreateExperienceRequestDTO;
 import cygni.experiences.services.ExperienceCommandService;
 import cygni.experiences.services.ExperienceQueryService;
-import io.quarkus.resteasy.reactive.jackson.CustomSerialization;
 import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
 import java.util.UUID;
@@ -75,11 +74,14 @@ public class ExperienceResource {
   @CircuitBreaker(requestVolumeThreshold = 30, delay = 3000, failureRatio = 0.6)
   @RolesAllowed({"system", "admin"})
   public Uni<Response> createExperience(@Valid CreateExperienceRequestDTO dto) {
-    final var command =
-        new CreateExperienceCommand(
-            dto.artist(), dto.venue(), dto.date(), dto.price(), dto.seats());
-    logger.info("CreateExperienceCommand: " + command);
-    return commandService.handle(command).map(s -> Response.status(201).entity(s).build());
+
+    return Uni.createFrom()
+        .item(
+            new CreateExperienceCommand(
+                dto.artist(), dto.venue(), dto.date(), dto.price(), dto.seats()))
+        .log()
+        .flatMap(
+            cmd -> commandService.handle(cmd).map(s -> Response.status(201).entity(s).build()));
   }
 
   @POST
@@ -90,10 +92,14 @@ public class ExperienceResource {
   @RolesAllowed({"system", "admin"})
   public Uni<Response> changeExperienceSeats(
       @PathParam("aggregateID") UUID aggregateID, @Valid ChangeExperienceSeatsDTO dto) {
-    final var command = new ChangeExperienceSeatsCommand(dto.newSeats());
-    return commandService
-        .handle(aggregateID, command)
-        .map(s -> Response.status(202).entity(s).build());
+    return Uni.createFrom()
+        .item(new ChangeExperienceSeatsCommand(dto.newSeats()))
+        .log()
+        .flatMap(
+            cmd ->
+                commandService
+                    .handle(aggregateID, cmd)
+                    .map(s -> Response.status(202).entity(s).build()));
   }
 
   @POST
@@ -105,8 +111,13 @@ public class ExperienceResource {
   public Uni<Response> cancelExperience(
       @PathParam("aggregateID") UUID aggregateID, @Valid CancelExperienceDTO dto) {
     final var command = new CancelExperienceCommand(aggregateID, dto.reason());
-    return commandService
-        .handle(aggregateID, command)
-        .map(s -> Response.status(202).entity(s).build());
+    return Uni.createFrom()
+        .item(new CancelExperienceCommand(aggregateID, dto.reason()))
+        .log()
+        .flatMap(
+            cmd ->
+                commandService
+                    .handle(aggregateID, cmd)
+                    .map(s -> Response.status(202).entity(s).build()));
   }
 }
