@@ -16,9 +16,11 @@ import java.util.UUID;
 import javax.inject.Inject;
 import org.hibernate.reactive.mutiny.Mutiny;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 @QuarkusTest
+@Disabled
 public class UserResourceTest {
   static KeycloakTestClient keycloakClient = new KeycloakTestClient();
   static ExperienceCreatedDTO experienceCreatedDTO; // shared

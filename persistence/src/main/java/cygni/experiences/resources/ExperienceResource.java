@@ -8,6 +8,7 @@ import cygni.experiences.dtos.ChangeExperienceSeatsDTO;
 import cygni.experiences.dtos.CreateExperienceRequestDTO;
 import cygni.experiences.services.ExperienceCommandService;
 import cygni.experiences.services.ExperienceQueryService;
+import io.quarkus.resteasy.reactive.jackson.CustomSerialization;
 import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
 import java.util.UUID;
@@ -22,6 +23,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.faulttolerance.Timeout;

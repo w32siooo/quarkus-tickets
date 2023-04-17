@@ -5,6 +5,8 @@ quarkus:
       port: 8086
       test-port: 18082
       test-timeout: 10s
+  native:
+    additional-build-args: -H:ReflectionConfigurationFiles=reflection-config.json
   http:
     access-log:
       pattern: "...traceId=%{X,traceId} spanId=%{X,spanId}"
