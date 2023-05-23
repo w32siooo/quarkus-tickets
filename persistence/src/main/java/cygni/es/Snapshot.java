@@ -2,12 +2,10 @@ package cygni.es;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import org.hibernate.annotations.Type;
 
 public class Snapshot {
 
     private UUID id;
-    @Type(type="org.hibernate.type.PostgresUUIDType")
     private UUID aggregateId;
 
 

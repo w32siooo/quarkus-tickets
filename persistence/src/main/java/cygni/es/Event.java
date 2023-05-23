@@ -7,7 +7,6 @@ import org.hibernate.annotations.Type;
 public class Event {
 
   private UUID id;
-  @Type(type = "org.hibernate.type.PostgresUUIDType")
   private UUID aggregateId;
   private String type;
   private String aggregateType;

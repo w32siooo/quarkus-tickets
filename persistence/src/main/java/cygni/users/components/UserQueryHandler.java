@@ -5,8 +5,8 @@ import cygni.users.aggregates.UserAggregate;
 import cygni.users.dtos.UserViewDTO;
 import io.smallrye.mutiny.Uni;
 import java.util.UUID;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class UserQueryHandler implements UserQueryService {

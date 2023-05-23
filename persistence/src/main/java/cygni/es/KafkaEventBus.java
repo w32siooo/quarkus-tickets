@@ -5,8 +5,8 @@ import io.smallrye.reactive.messaging.kafka.KafkaClientService;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;

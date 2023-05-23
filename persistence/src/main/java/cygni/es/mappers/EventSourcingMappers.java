@@ -10,7 +10,7 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import org.slf4j.Logger;
 
-import javax.ws.rs.core.SecurityContext;
+import jakarta.ws.rs.core.SecurityContext;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;

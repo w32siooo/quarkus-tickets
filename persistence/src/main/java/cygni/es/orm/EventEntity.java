@@ -2,8 +2,8 @@ package cygni.es.orm;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import javax.persistence.*;
-import javax.persistence.Entity;
+import jakarta.persistence.*;
+import jakarta.persistence.Entity;
 
 @Entity
 @Table(

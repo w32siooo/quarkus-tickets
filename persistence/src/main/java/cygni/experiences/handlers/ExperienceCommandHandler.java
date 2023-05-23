@@ -11,8 +11,8 @@ import cygni.experiences.dtos.ExperienceCreatedDTO;
 import cygni.experiences.services.ExperienceCommandService;
 import io.smallrye.mutiny.Uni;
 import java.util.UUID;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.jboss.logging.Logger;
 
 @ApplicationScoped

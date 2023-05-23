@@ -9,8 +9,8 @@ import cygni.users.dtos.BuyTicketDTO;
 import cygni.users.dtos.RemoveTicketDTO;
 import io.smallrye.mutiny.Uni;
 import java.util.UUID;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class UserCommandHandler implements UserCommandService {
