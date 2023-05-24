@@ -1,6 +1,6 @@
 package cygni.es;
 
-import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 import org.hibernate.annotations.Type;
 
@@ -13,15 +13,16 @@ public class Event {
   private long version;
   private byte[] data;
   private byte[] metadata;
-  private OffsetDateTime timestamp;
+  private ZonedDateTime timestamp;
 
   public Event(String type, String aggregateType) {
     this.id = UUID.randomUUID();
     this.type = type;
     this.aggregateType = aggregateType;
-    this.timestamp = OffsetDateTime.now();
+    this.timestamp = ZonedDateTime.now();
   }
-public Event(UUID id, UUID aggregateId, String aggregateType, String eventType, byte[] data, byte[] metadata, Long version, OffsetDateTime timestamp) {
+public Event(UUID id, UUID aggregateId, String aggregateType,
+             String eventType, byte[] data, byte[] metadata, Long version, ZonedDateTime timestamp) {
 
     this.id = id;
     this.aggregateId = aggregateId;
@@ -64,7 +65,7 @@ public Event(UUID id, UUID aggregateId, String aggregateType, String eventType, 
         return metadata;
     }
 
-    public OffsetDateTime getTimestamp() {
+    public ZonedDateTime getTimestamp() {
         return timestamp;
     }
 
@@ -96,7 +97,7 @@ public Event(UUID id, UUID aggregateId, String aggregateType, String eventType, 
         this.metadata = metadata;
     }
 
-    public void setTimestamp(OffsetDateTime timestamp) {
+    public void setTimestamp(ZonedDateTime timestamp) {
         this.timestamp = timestamp;
     }
 }

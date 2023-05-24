@@ -10,6 +10,7 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
+import org.hibernate.annotations.TimeZoneStorage;
 
 @Entity
 @Table(name = "snapshots", uniqueConstraints = @UniqueConstraint(columnNames = {"aggregate_id"}))
@@ -22,11 +23,9 @@ public class SnapshotEntity {
   @Column(name = "aggregate_type", nullable = false)
   private String aggregateType;
 
-  @Lob
   @Column(name = "data")
   private byte[] data;
 
-  @Lob
   @Column(name = "metadata")
   private byte[] metadata;
 
@@ -35,6 +34,7 @@ public class SnapshotEntity {
   private Long version;
 
   @Column(name = "timestamp", nullable = false)
+  @TimeZoneStorage
   private OffsetDateTime timestamp;
 
   public SnapshotEntity() {}

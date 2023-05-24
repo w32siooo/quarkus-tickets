@@ -1,9 +1,11 @@
 package cygni.es.orm;
 
 import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 import jakarta.persistence.*;
 import jakarta.persistence.Entity;
+import org.hibernate.annotations.TimeZoneStorage;
 
 @Entity
 @Table(
@@ -23,11 +25,9 @@ public class EventEntity {
   @Column(name = "event_type", nullable = false)
   private String eventType;
 
-  @Lob
   @Column(name = "data")
   private byte[] data;
 
-  @Lob
   @Column(name = "metadata")
   private byte[] metadata;
 
@@ -36,10 +36,11 @@ public class EventEntity {
   private Long version;
 
   @Column(name = "timestamp", nullable = false)
-  private OffsetDateTime timestamp;
+  @TimeZoneStorage
+  private ZonedDateTime timestamp;
 
   public EventEntity() {}
-public EventEntity(UUID aggregateId, String aggregateType, String type, byte[] data, byte[] metadata, long version, OffsetDateTime now) {
+public EventEntity(UUID aggregateId, String aggregateType, String type, byte[] data, byte[] metadata, long version, ZonedDateTime now) {
     this.aggregateId = aggregateId;
     this.aggregateType = aggregateType;
     this.eventType = type;
@@ -77,7 +78,7 @@ public EventEntity(UUID aggregateId, String aggregateType, String type, byte[] d
         return version;
     }
 
-    public OffsetDateTime getTimestamp() {
+    public ZonedDateTime getTimestamp() {
         return timestamp;
     }
 }

@@ -4,6 +4,7 @@ import cygni.es.exceptions.InvalidEventException;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -82,7 +83,7 @@ public abstract class AggregateRoot implements Aggregate {
     event.setType(eventType);
     event.setData(Objects.isNull(data) ? new byte[] {} : data);
     event.setMetadata(Objects.isNull(metadata) ? new byte[] {} : metadata);
-    event.setTimestamp(OffsetDateTime.now());
+    event.setTimestamp(ZonedDateTime.now());
     return event;
   }
 

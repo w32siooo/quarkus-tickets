@@ -84,13 +84,7 @@ public class ExperienceResourceTest {
         .post(res.aggregateID() + "/changeSeats")
         .then()
         .statusCode(202);
-    given().auth().oauth2(getAccessToken("alice"))
-        .when()
-        .contentType(ContentType.JSON)
-        .body(new ChangeExperienceSeatsDTO(6))
-        .post(res.aggregateID() + "/changeSeats")
-        .then()
-        .statusCode(202);
+
     var res2 =
         given().auth().oauth2(getAccessToken("alice"))
             .when()

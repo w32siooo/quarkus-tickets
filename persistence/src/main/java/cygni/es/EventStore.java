@@ -9,6 +9,7 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.unchecked.Unchecked;
 import java.lang.reflect.InvocationTargetException;
 import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -218,7 +219,7 @@ public class EventStore implements EventStoreDB {
                                     event.getData(),
                                     event.getMetadata(),
                                     event.getVersion(),
-                                    OffsetDateTime.now()))
+                                    ZonedDateTime.now()))
             .collect()
             .asList()
             .chain(e -> session.persistAll(e.toArray()))
